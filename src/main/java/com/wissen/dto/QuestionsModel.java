@@ -1,6 +1,6 @@
 package com.wissen.dto;
 
-public class Model {
+public class QuestionsModel {
 	String id;
 	String created_at;
 	String name;

@@ -2,14 +2,14 @@ package com.wissen.dto;
 
 import java.util.List;
 
-public class CustomDTO {
+public class QuestionsDTO {
 	
-	List<Model> models;
+	List<QuestionsModel> models;
 	String total;
-	public List<Model> getModels() {
+	public List<QuestionsModel> getModels() {
 		return models;
 	}
-	public void setModels(List<Model> models) {
+	public void setModels(List<QuestionsModel> models) {
 		this.models = models;
 	}
 	public String getTotal() {
