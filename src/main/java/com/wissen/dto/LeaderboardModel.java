@@ -1,14 +1,14 @@
 package com.wissen.dto;
 
 public class LeaderboardModel {
-	private Integer rank;
+	private String rank;
 	private String hacker;
 	private Long timestamp;
 	
-	public Integer getRank() {
+	public String getRank() {
 		return rank;
 	}
-	public void setRank(Integer rank) {
+	public void setRank(String rank) {
 		this.rank = rank;
 	}
 	public String getHacker() {

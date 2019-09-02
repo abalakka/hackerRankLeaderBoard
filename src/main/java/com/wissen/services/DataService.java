@@ -36,6 +36,7 @@ import com.wissen.dto.QuestionsModel;
 
 import ch.qos.logback.core.rolling.helper.DateTokenConverter;
 
+import com.wissen.HackerRankLeaderboardApplication;
 import com.wissen.dto.LeaderboardDTO;
 import com.wissen.dto.LeaderboardModel;
 import com.wissen.dto.QuestionsDTO;
@@ -53,7 +54,7 @@ public class DataService {
 
 	public String leadboardUrlFor(String questionUrl) {
 		return "https://www.hackerrank.com/rest/contests/master/challenges/" + questionUrl
-				+ "/leaderboard/filter?offset=0&limit=20&include_practice=true&friends=follows&filter_kinds=friends";
+				+ "/leaderboard/filter?offset=0&limit=100&include_practice=true&friends=follows&filter_kinds=friends";
 	}
 
 	public String questionsUrlFor(String profile) {
@@ -64,9 +65,19 @@ public class DataService {
 	public HttpHeaders setCookie() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cookie",
-				"_ga=GA1.2.272114498.1565022969; _fbp=fb.1.1565022968736.2058434127; _mkto_trk=id:487-WAY-049&token:_mch-hackerrank.com-1565022972588-51486; hackerrank_mixpanel_token=f3ffdc85-12fd-4316-bab1-f95b32403af3; _biz_uid=8e17c68264bd4f62b31f49c7873e36b3; enableIntellisenseUserPref=true; hacker_editor_theme=light; remember_hacker_token=BAhbCFsGaQPnmBFJIiIkMmEkMTAkQ2FwRkxiay5GcVVuaU5nbER6dGZXTwY6BkVUSSIXMTU2NjAxNjk3Mi4zNTM4NDc1BjsARg%3D%3D--a1d429a89c3842b5226bad3ca9357bc5246bc279; __utmz=74197771.1566017972.23.3.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); hackerrankx_mixpanel_token=f3ffdc85-12fd-4316-bab1-f95b32403af3; mp_dcd74fdb7c65d92ce5d036daddac0a25_mixpanel=%7B%22distinct_id%22%3A%20%22f3ffdc85-12fd-4316-bab1-f95b32403af3%22%2C%22%24device_id%22%3A%20%2216c9df45581207-01b4beee1f7826-7373e61-100200-16c9df455821ad%22%2C%22%24user_id%22%3A%20%22f3ffdc85-12fd-4316-bab1-f95b32403af3%22%2C%22%24search_engine%22%3A%20%22google%22%2C%22%24initial_referrer%22%3A%20%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%20%22www.google.com%22%7D; _biz_flagsA=%7B%22Version%22%3A1%2C%22Mkto%22%3A%221%22%7D; __zlcmid=tpiT3tAuksMArG; h_r=submissions; h_l=_default; h_v=_default; _biz_nA=13; _biz_pendingA=%5B%5D; react_var=true__trm4; react_var2=true__trm4; hrc_l_i=T; metrics_user_identifier=1198e7-3a05143008d3027b38189dcee0100490db798267; _hrank_session=d594d96c5a3c370d9c725918cad8a6b045fe6ce6be23f027431cde0abe0e93dc91bcedd7b326141c846c4cd00d46547861545f7c25f31944d4ef02f36a9a2110; user_type=hacker; __utma=74197771.272114498.1565022969.1567049610.1567221814.48; __utmc=74197771; mp_bcb75af88bccc92724ac5fd79271e1ff_mixpanel=%7B%22distinct_id%22%3A%20%22f3ffdc85-12fd-4316-bab1-f95b32403af3%22%2C%22%24device_id%22%3A%20%2216c62a349dafe-0a874e5d5e2fe6-c343162-100200-16c62a349db3c0%22%2C%22%24search_engine%22%3A%20%22google%22%2C%22%24initial_referrer%22%3A%20%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%20%22www.google.com%22%2C%22%24user_id%22%3A%20%22f3ffdc85-12fd-4316-bab1-f95b32403af3%22%7D; mp_86cf4681911d3ff600208fdc823c5ff5_mixpanel=%7B%22distinct_id%22%3A%20%2216c62a37811498-08275056632d84-c343162-100200-16c62a3781276d%22%2C%22%24device_id%22%3A%20%2216c62a37811498-08275056632d84-c343162-100200-16c62a3781276d%22%2C%22%24initial_referrer%22%3A%20%22https%3A%2F%2Fwww.hackerrank.com%2Faccess-account%2F%3Fh_r%3Dhome%26h_l%3Dheader%22%2C%22%24initial_referring_domain%22%3A%20%22www.hackerrank.com%22%2C%22%24search_engine%22%3A%20%22google%22%7D; __utmt_candidate_company=1; __utmb=74197771.4.10.1567223086932");
+				"{COOKIE}");
 		return headers;
 	}
+	
+	public void cellColour(int weekTotal, Cell cell, CellStyle green, CellStyle amber, CellStyle red) {
+		if (weekTotal >= 6)
+			cell.setCellStyle(green);
+		else if (weekTotal > 3)
+			cell.setCellStyle(amber);
+		else
+			cell.setCellStyle(red);
+	}
+	
 
 	public String dataFor() {
 		RestTemplate restTemplate = new RestTemplate();
@@ -125,15 +136,15 @@ public class DataService {
 		}
 
 		rowNum = 1;
-		int maxProfiles = 1;
+		int maxProfiles = 2;
 		for (Row row : profileSheet) {
-			if (rowNum > maxProfiles)
+			if (rowNum++ > maxProfiles)
 				break;
 			
 			String profile = row.getCell(1).getStringCellValue();
 
 			String url = questionsUrlFor(profile);
-
+			System.out.println("url is: " + url);
 			ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 			QuestionsDTO resp = null;
@@ -150,36 +161,56 @@ public class DataService {
 			}
 		}
 		
-		
-		allQuestions.forEach(questionUrl -> {
+		System.out.println("Starting the partaaay");
+		rowNum = 1;
+//		allQuestions.forEach(questionUrl -> {
+		for(String questionUrl : allQuestions) {	
 			String leaderBoardUrl = leadboardUrlFor(questionUrl);
+
+			if(rowNum++ > 20)
+				break;
+						
 			HttpHeaders headers = setCookie();
 
 			HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 			ResponseEntity<LeaderboardDTO> respEntity = restTemplate.exchange(leaderBoardUrl, HttpMethod.GET, entity,
 					LeaderboardDTO.class);
 
-			System.out.println("/n==============" + questionUrl + "================");
+			
+			System.out.println("\n==============" + questionUrl + "================" + rowNum++);
+			
 			List<LeaderboardModel> friendsLeaderboard = respEntity.getBody().getModels();
 			friendsLeaderboard.forEach(curr -> {
-				String currProfile = curr.getHacker();
-				Map<LocalDate, Integer> dateToCount = profileToCount.get(currProfile);
-
-				if (curr.getRank() == 1) {
+				String currProfile = curr.getHacker().toLowerCase();
+//				System.out.println(currProfile + " Current profile");
+				Map<LocalDate, Integer> dateToCount = profileToCount.getOrDefault(currProfile, new HashMap<>());
+				
+				if (curr.getRank().equals("1")) {
+					
 					LocalDate date = LocalDate.ofInstant(Instant.ofEpochSecond(curr.getTimestamp()),
 							TimeZone.getDefault().toZoneId());
+					if(date.compareTo(LocalDate.parse("2019-01-01")) < 0)
+						System.out.println(date);
 					dateToCount.putIfAbsent(date, 0);
 					dateToCount.put(date, dateToCount.get(date) + 1);
+//					System.out.println(currProfile + " " + questionUrl + " TEMP: " + temp);
 				}
 			});
-		});
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+//		)
+		;
 
 		
 		rowNum = 1;
 		for(Entry<String, Map<LocalDate, Integer>> currProfile: profileToCount.entrySet()) {
 		
 			Row boardRow = leaderboardSheet.createRow(rowNum++);
-			boardRow.createCell(0).setCellValue(nameToProfile.get(currProfile.getKey()));
+			boardRow.createCell(0).setCellValue(nameToProfile.getOrDefault(currProfile.getKey(), currProfile.getKey()));
 			
 			int total = 0;
 			Map<LocalDate, Integer> solvedPerDay = currProfile.getValue();
@@ -196,16 +227,15 @@ public class DataService {
 					weekTotal += solvedPerDay.getOrDefault(currDate, 0);
 					currDate = currDate.plusDays(1);
 				}
+				
 				total += weekTotal;
+				
 				headerRow.getCell(currWeek).setCellValue("Week " + currWeek);
 				boardRow.createCell(currWeek).setCellValue(weekTotal);
+				
 				Cell cell = boardRow.getCell(currWeek);
-				if (weekTotal >= 6)
-					cell.setCellStyle(green);
-				else if (weekTotal > 3)
-					cell.setCellStyle(amber);
-				else
-					cell.setCellStyle(red);
+				cellColour(weekTotal, cell, green, amber, red);
+				
 				currWeekStart = currWeekEnd;
 			}
 
@@ -220,22 +250,22 @@ public class DataService {
 					weekTotal += solvedPerDay.getOrDefault(currDate, 0);
 					currDate = currDate.plusDays(1);
 				}
+				
 				total += weekTotal;
+				
 				headerRow.getCell(currWeek).setCellValue("Week " + currWeek);
 				boardRow.createCell(currWeek).setCellValue(weekTotal);
+				
 				Cell cell = boardRow.getCell(currWeek);
-				if (weekTotal >= 6)
-					cell.setCellStyle(green);
-				else if (weekTotal > 3)
-					cell.setCellStyle(amber);
-				else
-					cell.setCellStyle(red);
+				cellColour(weekTotal, cell, green, amber, red);
+				
 				currWeek++;
 				currWeekStart = currWeekEnd;
 			}
 			headerRow.getCell(currWeek).setCellValue("Total");
 			boardRow.createCell(currWeek).setCellValue(total);
-
+			
+			System.out.println("Calc done for: " + currProfile.getKey());
 		}
 		
 		FileOutputStream opFile = null;
