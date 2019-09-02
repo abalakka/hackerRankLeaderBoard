@@ -124,8 +124,9 @@ public class DataService {
 		Map<String, Map<LocalDate, Integer>> profileToCount = new HashMap<>();
 
 		int rowNum = 1;
+		int maxProfiles = 77;
 		for (Row row : profileSheet) {
-			if (rowNum > 77)
+			if (rowNum > maxProfiles)
 				break;
 
 			String name = row.getCell(0).getStringCellValue();
@@ -136,7 +137,6 @@ public class DataService {
 		}
 
 		rowNum = 1;
-		int maxProfiles = 2;
 		for (Row row : profileSheet) {
 			if (rowNum++ > maxProfiles)
 				break;
@@ -159,6 +159,12 @@ public class DataService {
 				if (!allQuestions.contains(currSubmission.getCh_slug()))
 					allQuestions.add(currSubmission.getCh_slug());
 			}
+			
+			try {
+				Thread.sleep((long) (Math.random()*777));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		System.out.println("Starting the partaaay");
@@ -167,8 +173,8 @@ public class DataService {
 		for(String questionUrl : allQuestions) {	
 			String leaderBoardUrl = leadboardUrlFor(questionUrl);
 
-			if(rowNum++ > 20)
-				break;
+//			if(rowNum++ > 20)
+//				break;
 						
 			HttpHeaders headers = setCookie();
 
@@ -177,7 +183,7 @@ public class DataService {
 					LeaderboardDTO.class);
 
 			
-			System.out.println("\n==============" + questionUrl + "================" + rowNum++);
+			System.out.println("\n==============" + questionUrl + "================ " + rowNum++);
 			
 			List<LeaderboardModel> friendsLeaderboard = respEntity.getBody().getModels();
 			friendsLeaderboard.forEach(curr -> {
@@ -187,17 +193,17 @@ public class DataService {
 				
 				if (curr.getRank().equals("1")) {
 					
-					LocalDate date = LocalDate.ofInstant(Instant.ofEpochSecond(curr.getTimestamp()),
+					LocalDate date = LocalDate.ofInstant(Instant.ofEpochSecond(curr.getTime_taken()),
 							TimeZone.getDefault().toZoneId());
-					if(date.compareTo(LocalDate.parse("2019-01-01")) < 0)
-						System.out.println(date);
+//					if(date.compareTo(LocalDate.parse("2019-01-01")) < 0)
+//						System.out.println(date);
 					dateToCount.putIfAbsent(date, 0);
 					dateToCount.put(date, dateToCount.get(date) + 1);
 //					System.out.println(currProfile + " " + questionUrl + " TEMP: " + temp);
 				}
 			});
 			try {
-				Thread.sleep(500);
+				Thread.sleep((long) (Math.random()*777));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
