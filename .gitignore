@@ -1,3 +1,9 @@
+Pipfile
+Pipfile.lock
+
+## gmail email and password file
+secrets.py
+
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
