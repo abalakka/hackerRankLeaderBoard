@@ -18,6 +18,7 @@ import java.util.TimeZone;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -118,24 +119,28 @@ public class DataService {
 		Map<String, Map<LocalDate, Integer>> profileToCount = new HashMap<>();
 
 		int rowNum = 1;
-		int maxProfiles = 77;
-		for (Row row : profileSheet) {
-			if (rowNum > maxProfiles)
-				break;
-
-			String name = row.getCell(0).getStringCellValue();
-			String profile = row.getCell(1).getStringCellValue();
-			nameToProfile.put(profile, name);
-
-			profileToCount.put(profile, new HashMap<>());
-		}
-
-		rowNum = 1;
+		int maxProfiles = 82;
 		for (Row row : profileSheet) {
 			if (rowNum++ > maxProfiles)
 				break;
 
+			String name = row.getCell(0).getStringCellValue();
 			String profile = row.getCell(1).getStringCellValue();
+			System.out.println(name + " -> " + profile);
+			nameToProfile.put(profile.toLowerCase(), name);
+
+			profileToCount.put(profile.toLowerCase(), new HashMap<>());
+		}
+
+		System.out.println("\n\n\n\n");
+
+		rowNum = 1;
+//		for (Row row : profileSheet) {
+		for(String profile : nameToProfile.keySet()) {
+			if (rowNum++ > maxProfiles)
+				break;
+
+//			String profile = row.getCell(1).getStringCellValue();
 
 			String url = questionsUrlFor(profile);
 			System.out.println("url is: " + url);
@@ -156,12 +161,13 @@ public class DataService {
 			}
 
 			try {
-				Thread.sleep((long) (Math.random() * 777));
+				Thread.sleep((long) (Math.random()*250));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 
+		System.out.println("\n\n\n\n");
 		System.out.println("Starting the partaaay");
 		rowNum = 1;
 		// allQuestions.forEach(questionUrl -> {
@@ -177,7 +183,8 @@ public class DataService {
 			ResponseEntity<LeaderboardDTO> respEntity = restTemplate.exchange(leaderBoardUrl, HttpMethod.GET, entity,
 					LeaderboardDTO.class);
 
-			System.out.println("\n==============" + questionUrl + "================ " + rowNum++);
+
+			System.out.println("==============" + questionUrl + "================ " + rowNum++);
 
 			List<LeaderboardModel> friendsLeaderboard = respEntity.getBody().getModels();
 			friendsLeaderboard.forEach(curr -> {
@@ -197,7 +204,7 @@ public class DataService {
 				}
 			});
 			try {
-				Thread.sleep((long) (Math.random() * 777));
+				Thread.sleep((long) (Math.random()*100));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -209,7 +216,7 @@ public class DataService {
 		for (Entry<String, Map<LocalDate, Integer>> currProfile : profileToCount.entrySet()) {
 
 			Row boardRow = leaderboardSheet.createRow(rowNum++);
-			boardRow.createCell(0).setCellValue(nameToProfile.getOrDefault(currProfile.getKey(), currProfile.getKey()));
+			boardRow.createCell(0).setCellValue(nameToProfile.getOrDefault(currProfile.getKey(), currProfile.getKey().toLowerCase()));
 
 			int total = 0;
 			Map<LocalDate, Integer> solvedPerDay = currProfile.getValue();
@@ -266,6 +273,12 @@ public class DataService {
 
 			System.out.println("Calc done for: " + currProfile.getKey());
 		}
+
+		Font boldFont = leaderboardWorkbook.createFont();
+		boldFont.setBold(true);
+		CellStyle boldStyle = leaderboardWorkbook.createCellStyle();
+		boldStyle.setFont(boldFont);
+		headerRow.setRowStyle(boldStyle );
 
 		FileOutputStream opFile = null;
 		try {
