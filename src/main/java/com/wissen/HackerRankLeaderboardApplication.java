@@ -64,10 +64,7 @@ public class HackerRankLeaderboardApplication implements CommandLineRunner {
 	}
 
 	private void _run(int idx) throws IOException {
-		--idx;
-		
-		System.out.println(dataService.dataFor(rs[idx].getFile()));
-		
+		System.out.println(dataService.dataFor(rs[idx-1].getInputStream(),idx));		
 	}
 
 	private int getFileNumber(String arg) {

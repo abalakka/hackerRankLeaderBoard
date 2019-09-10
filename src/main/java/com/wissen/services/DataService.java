@@ -1,10 +1,8 @@
 package com.wissen.services;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -73,17 +71,10 @@ public class DataService {
 		else
 			cell.setCellStyle(red);
 	}
-
-	public String dataFor(File file) {
+	// use which to identity for which excel it's running
+	public String dataFor(InputStream fIP,int which) {
 		RestTemplate restTemplate = new RestTemplate();
 		ObjectMapper mapper = new ObjectMapper();
-
-		FileInputStream fIP = null;
-		try {
-			fIP = new FileInputStream(file);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
 
 		XSSFWorkbook profileWorkbook = null;
 		try {
@@ -133,12 +124,12 @@ public class DataService {
 		System.out.println("\n\n\n\n");
 
 		rowNum = 1;
-//		for (Row row : profileSheet) {
-		for(String profile : nameToProfile.keySet()) {
+		// for (Row row : profileSheet) {
+		for (String profile : nameToProfile.keySet()) {
 			if (rowNum++ > maxProfiles)
 				break;
 
-//			String profile = row.getCell(1).getStringCellValue();
+			// String profile = row.getCell(1).getStringCellValue();
 
 			String url = questionsUrlFor(profile);
 			System.out.println("url is: " + url);
@@ -159,7 +150,7 @@ public class DataService {
 			}
 
 			try {
-				Thread.sleep((long) (Math.random()*250));
+				Thread.sleep((long) (Math.random() * 250));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -181,7 +172,6 @@ public class DataService {
 			ResponseEntity<LeaderboardDTO> respEntity = restTemplate.exchange(leaderBoardUrl, HttpMethod.GET, entity,
 					LeaderboardDTO.class);
 
-
 			System.out.println("==============" + questionUrl + "================ " + rowNum++);
 
 			List<LeaderboardModel> friendsLeaderboard = respEntity.getBody().getModels();
@@ -202,7 +192,7 @@ public class DataService {
 				}
 			});
 			try {
-				Thread.sleep((long) (Math.random()*100));
+				Thread.sleep((long) (Math.random() * 100));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -214,7 +204,8 @@ public class DataService {
 		for (Entry<String, Map<LocalDate, Integer>> currProfile : profileToCount.entrySet()) {
 
 			Row boardRow = leaderboardSheet.createRow(rowNum++);
-			boardRow.createCell(0).setCellValue(nameToProfile.getOrDefault(currProfile.getKey(), currProfile.getKey().toLowerCase()));
+			boardRow.createCell(0)
+					.setCellValue(nameToProfile.getOrDefault(currProfile.getKey(), currProfile.getKey().toLowerCase()));
 
 			int total = 0;
 			Map<LocalDate, Integer> solvedPerDay = currProfile.getValue();
@@ -276,7 +267,7 @@ public class DataService {
 		boldFont.setBold(true);
 		CellStyle boldStyle = leaderboardWorkbook.createCellStyle();
 		boldStyle.setFont(boldFont);
-		headerRow.setRowStyle(boldStyle );
+		headerRow.setRowStyle(boldStyle);
 
 		FileOutputStream opFile = null;
 		try {
