@@ -74,11 +74,9 @@ public class DataService {
 			cell.setCellStyle(red);
 	}
 
-	public String dataFor() {
+	public String dataFor(File file) {
 		RestTemplate restTemplate = new RestTemplate();
 		ObjectMapper mapper = new ObjectMapper();
-
-		File file = new File(this.getClass().getResource("/profiles.xlsx").getFile());
 
 		FileInputStream fIP = null;
 		try {
