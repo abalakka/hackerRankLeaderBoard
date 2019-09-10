@@ -1,10 +1,10 @@
 import os
 
-BASE_DIR = os.environ["BASE_DIR"]
+# BASE_DIR = os.environ["BASE_DIR"]
 
 
 # for debugging
-# BASE_DIR = "/home/jigar/projects/hackerRankLeaderBoard"
+BASE_DIR = "/home/jigar/projects/hackerRankLeaderBoard"
 
 
 # server_addr = "http://localhost:8080/leaderboard"
@@ -19,7 +19,7 @@ filename = "leaderboard.xlsx"
 # for debugging
 # filename = "zzz.txt"
 
-os.system(f"wget -O {os.path.join(BASE_DIR,filename)} {server_addr}")
+# os.system(f"wget -O {os.path.join(BASE_DIR,filename)} {server_addr}")
 
 ##send email code from gfg
 
@@ -44,14 +44,14 @@ def send_email():
 	msg['From'] = fromaddr
 
 	# storing the receivers email address
-	msg['To'] = toaddr if type(toaddr) is list else [toaddr]
+	msg['To'] = ",".join(toaddr) if type(toaddr) is list else toaddr
 
 	# storing the subject
 	msg['Subject'] = "leaderboard as of date " +date.today().strftime("%d/%m/%y")
 
 	# string to store the body of the mail
-	# body = "PFA"
-	body = "not the leaderboard just testing"
+	body = "PFA"
+	# body = "not the leaderboard just testing"
 
 	# attach the body with the msg instance
 	msg.attach(MIMEText(body, 'plain'))
