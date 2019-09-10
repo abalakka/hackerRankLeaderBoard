@@ -32,14 +32,10 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wissen.dto.QuestionsModel;
-
-import ch.qos.logback.core.rolling.helper.DateTokenConverter;
-
-import com.wissen.HackerRankLeaderboardApplication;
 import com.wissen.dto.LeaderboardDTO;
 import com.wissen.dto.LeaderboardModel;
 import com.wissen.dto.QuestionsDTO;
+import com.wissen.dto.QuestionsModel;
 
 @Service
 public class DataService {
@@ -64,11 +60,10 @@ public class DataService {
 
 	public HttpHeaders setCookie() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Cookie",
-				"{COOKIE}");
+		headers.set("Cookie", "{COOKIE}");
 		return headers;
 	}
-	
+
 	public void cellColour(int weekTotal, Cell cell, CellStyle green, CellStyle amber, CellStyle red) {
 		if (weekTotal >= 6)
 			cell.setCellStyle(green);
@@ -77,7 +72,6 @@ public class DataService {
 		else
 			cell.setCellStyle(red);
 	}
-	
 
 	public String dataFor() {
 		RestTemplate restTemplate = new RestTemplate();
@@ -140,7 +134,7 @@ public class DataService {
 		for (Row row : profileSheet) {
 			if (rowNum++ > maxProfiles)
 				break;
-			
+
 			String profile = row.getCell(1).getStringCellValue();
 
 			String url = questionsUrlFor(profile);
@@ -149,7 +143,8 @@ public class DataService {
 
 			QuestionsDTO resp = null;
 			try {
-				resp = mapper.readValue(response.getBody(), new TypeReference<QuestionsDTO>() {});
+				resp = mapper.readValue(response.getBody(), new TypeReference<QuestionsDTO>() {
+				});
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -159,68 +154,66 @@ public class DataService {
 				if (!allQuestions.contains(currSubmission.getCh_slug()))
 					allQuestions.add(currSubmission.getCh_slug());
 			}
-			
+
 			try {
-				Thread.sleep((long) (Math.random()*777));
+				Thread.sleep((long) (Math.random() * 777));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 		System.out.println("Starting the partaaay");
 		rowNum = 1;
-//		allQuestions.forEach(questionUrl -> {
-		for(String questionUrl : allQuestions) {	
+		// allQuestions.forEach(questionUrl -> {
+		for (String questionUrl : allQuestions) {
 			String leaderBoardUrl = leadboardUrlFor(questionUrl);
 
-//			if(rowNum++ > 20)
-//				break;
-						
+			// if(rowNum++ > 20)
+			// break;
+
 			HttpHeaders headers = setCookie();
 
 			HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 			ResponseEntity<LeaderboardDTO> respEntity = restTemplate.exchange(leaderBoardUrl, HttpMethod.GET, entity,
 					LeaderboardDTO.class);
 
-			
 			System.out.println("\n==============" + questionUrl + "================ " + rowNum++);
-			
+
 			List<LeaderboardModel> friendsLeaderboard = respEntity.getBody().getModels();
 			friendsLeaderboard.forEach(curr -> {
 				String currProfile = curr.getHacker().toLowerCase();
-//				System.out.println(currProfile + " Current profile");
+				// System.out.println(currProfile + " Current profile");
 				Map<LocalDate, Integer> dateToCount = profileToCount.getOrDefault(currProfile, new HashMap<>());
-				
+
 				if (curr.getRank().equals("1")) {
-					
-					LocalDate date = LocalDate.ofInstant(Instant.ofEpochSecond(curr.getTime_taken()),
-							TimeZone.getDefault().toZoneId());
-//					if(date.compareTo(LocalDate.parse("2019-01-01")) < 0)
-//						System.out.println(date);
+
+					LocalDate date = Instant.ofEpochSecond(curr.getTime_taken())
+							.atZone(TimeZone.getDefault().toZoneId()).toLocalDate();
+					// if(date.compareTo(LocalDate.parse("2019-01-01")) < 0)
+					// System.out.println(date);
 					dateToCount.putIfAbsent(date, 0);
 					dateToCount.put(date, dateToCount.get(date) + 1);
-//					System.out.println(currProfile + " " + questionUrl + " TEMP: " + temp);
+					// System.out.println(currProfile + " " + questionUrl + " TEMP: " + temp);
 				}
 			});
 			try {
-				Thread.sleep((long) (Math.random()*777));
+				Thread.sleep((long) (Math.random() * 777));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-//		)
+		// )
 		;
 
-		
 		rowNum = 1;
-		for(Entry<String, Map<LocalDate, Integer>> currProfile: profileToCount.entrySet()) {
-		
+		for (Entry<String, Map<LocalDate, Integer>> currProfile : profileToCount.entrySet()) {
+
 			Row boardRow = leaderboardSheet.createRow(rowNum++);
 			boardRow.createCell(0).setCellValue(nameToProfile.getOrDefault(currProfile.getKey(), currProfile.getKey()));
-			
+
 			int total = 0;
 			Map<LocalDate, Integer> solvedPerDay = currProfile.getValue();
-			
+
 			// first week is till 25 Aug, 19[Sun]
 			LocalDate startDate = LocalDate.parse("2019-08-16");
 			LocalDate currWeekStart = startDate;
@@ -233,15 +226,15 @@ public class DataService {
 					weekTotal += solvedPerDay.getOrDefault(currDate, 0);
 					currDate = currDate.plusDays(1);
 				}
-				
+
 				total += weekTotal;
-				
+
 				headerRow.getCell(currWeek).setCellValue("Week " + currWeek);
 				boardRow.createCell(currWeek).setCellValue(weekTotal);
-				
+
 				Cell cell = boardRow.getCell(currWeek);
 				cellColour(weekTotal, cell, green, amber, red);
-				
+
 				currWeekStart = currWeekEnd;
 			}
 
@@ -256,24 +249,24 @@ public class DataService {
 					weekTotal += solvedPerDay.getOrDefault(currDate, 0);
 					currDate = currDate.plusDays(1);
 				}
-				
+
 				total += weekTotal;
-				
+
 				headerRow.getCell(currWeek).setCellValue("Week " + currWeek);
 				boardRow.createCell(currWeek).setCellValue(weekTotal);
-				
+
 				Cell cell = boardRow.getCell(currWeek);
 				cellColour(weekTotal, cell, green, amber, red);
-				
+
 				currWeek++;
 				currWeekStart = currWeekEnd;
 			}
 			headerRow.getCell(currWeek).setCellValue("Total");
 			boardRow.createCell(currWeek).setCellValue(total);
-			
+
 			System.out.println("Calc done for: " + currProfile.getKey());
 		}
-		
+
 		FileOutputStream opFile = null;
 		try {
 			opFile = new FileOutputStream("leaderboard.xlsx");
