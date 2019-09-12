@@ -1,7 +1,7 @@
 ### build
 
 ```shell
-$ mvn package
+$ [bash] mvnw[.bat] package
 ```
 
 ### Usage
