@@ -1,6 +1,9 @@
+cookies.txt
 Pipfile
 Pipfile.lock
 __pycache__/
+*.class
+*.java
 
 ## gmail email and password file
 secrets.py
@@ -37,4 +40,4 @@ build/
 ### VS Code ###
 .vscode/
 
-leaderboard.xlsx
+leaderboard*.xlsx
