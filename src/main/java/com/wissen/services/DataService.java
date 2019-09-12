@@ -59,6 +59,11 @@ public class DataService {
 
 	public HttpHeaders setCookie() {
 		HttpHeaders headers = new HttpHeaders();
+
+		// newgrads tracking => jigar's cookie
+		// employees tracking => anirudh's cookie
+		// based on "profileFilename" parameter in dataFor()
+
 		headers.set("Cookie", "{COOKIE}");
 		return headers;
 	}
@@ -71,8 +76,8 @@ public class DataService {
 		else
 			cell.setCellStyle(red);
 	}
-	// use which to identity for which excel it's running
-	public String dataFor(InputStream fIP,int which) {
+
+	public String dataFor(InputStream fIP,String profileFilename) {
 		RestTemplate restTemplate = new RestTemplate();
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -108,17 +113,20 @@ public class DataService {
 		Map<String, Map<LocalDate, Integer>> profileToCount = new HashMap<>();
 
 		int rowNum = 1;
-		int maxProfiles = 82;
+		int maxProfiles = profileSheet.getLastRowNum();
 		for (Row row : profileSheet) {
 			if (rowNum++ > maxProfiles)
 				break;
 
-			String name = row.getCell(0).getStringCellValue();
-			String profile = row.getCell(1).getStringCellValue();
-			System.out.println(name + " -> " + profile);
-			nameToProfile.put(profile.toLowerCase(), name);
-
-			profileToCount.put(profile.toLowerCase(), new HashMap<>());
+			try{
+				String name = row.getCell(0).getStringCellValue();
+				String profile = row.getCell(1).getStringCellValue();
+				System.out.println(name + " -> " + profile);
+				nameToProfile.put(profile.toLowerCase(), name);
+				profileToCount.put(profile.toLowerCase(), new HashMap<>());
+			}catch(NullPointerException e){
+				break;
+			}
 		}
 
 		System.out.println("\n\n\n\n");
@@ -169,9 +177,20 @@ public class DataService {
 			HttpHeaders headers = setCookie();
 
 			HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-			ResponseEntity<LeaderboardDTO> respEntity = restTemplate.exchange(leaderBoardUrl, HttpMethod.GET, entity,
-					LeaderboardDTO.class);
+			boolean infiniteLoop = true;
+			ResponseEntity<LeaderboardDTO> respEntity=null;
 
+			while(infiniteLoop){
+
+				try{
+					respEntity = restTemplate.exchange(leaderBoardUrl, HttpMethod.GET, entity,LeaderboardDTO.class);
+
+					infiniteLoop = false;
+
+				}catch(IllegalStateException e){
+					System.out.println("Arghh!! Bad Gateway for "+ questionUrl);
+				}
+			}
 			System.out.println("==============" + questionUrl + "================ " + rowNum++);
 
 			List<LeaderboardModel> friendsLeaderboard = respEntity.getBody().getModels();
@@ -201,9 +220,12 @@ public class DataService {
 		;
 
 		rowNum = 1;
+		int maxNumCharacters = 0;
 		for (Entry<String, Map<LocalDate, Integer>> currProfile : profileToCount.entrySet()) {
 
 			Row boardRow = leaderboardSheet.createRow(rowNum++);
+			maxNumCharacters = Math.max(maxNumCharacters,currProfile.getKey().length());
+
 			boardRow.createCell(0)
 					.setCellValue(nameToProfile.getOrDefault(currProfile.getKey(), currProfile.getKey().toLowerCase()));
 
@@ -234,7 +256,11 @@ public class DataService {
 				currWeekStart = currWeekEnd;
 			}
 
-			startDate = LocalDate.parse("2019-08-26");
+			if(profileFilename.contains("grads"))
+				startDate = LocalDate.parse("2019-09-09");
+			else
+				startDate = LocalDate.parse("2019-08-26");
+
 			currWeekStart = startDate;
 			currWeek = 2;
 			while (currWeekStart.compareTo(LocalDate.now()) < 0) {
@@ -263,6 +289,10 @@ public class DataService {
 			System.out.println("Calc done for: " + currProfile.getKey());
 		}
 
+		//so column doesn't get squeezed, this way is better than using autoSizeColumn()
+		int width = ((int)(maxNumCharacters * 1.14388)) * 256;
+		leaderboardSheet.setColumnWidth(0, width);
+
 		Font boldFont = leaderboardWorkbook.createFont();
 		boldFont.setBold(true);
 		CellStyle boldStyle = leaderboardWorkbook.createCellStyle();
@@ -271,7 +301,9 @@ public class DataService {
 
 		FileOutputStream opFile = null;
 		try {
-			opFile = new FileOutputStream("leaderboard.xlsx");
+
+			opFile = new FileOutputStream("leaderboard_"+profileFilename);
+
 			leaderboardWorkbook.write(opFile);
 			opFile.close();
 			leaderboardWorkbook.close();
