@@ -1,8 +1,10 @@
 ### build
 
 ```shell
-$ mvn package
+$ [bash] mvnw[.cmd] package
 ```
+
+> for windows use `mvnw.cmd` for unix use `mvnw`
 
 ### Usage
 
