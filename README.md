@@ -1,7 +1,7 @@
 ### build
 
 ```shell
-$ [bash] mvnw[.cmd] package
+$ [bash] mvnw[.cmd] clean package
 ```
 
 > for windows use `mvnw.cmd` for unix use `mvnw`
