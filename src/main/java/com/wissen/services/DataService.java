@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +14,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -28,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -152,7 +158,16 @@ public class DataService {
 
 			String url = questionsUrlFor(profile);
 			System.out.println("url is: " + url);
-			ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+			ResponseEntity<String> response=null;
+			boolean infiniteLoop = true;
+			while(infiniteLoop){
+				try{
+				 	response = restTemplate.getForEntity(url, String.class);
+					infiniteLoop = false;
+				}catch(RestClientException e){
+					System.out.println(e);
+				}
+			}
 
 			QuestionsDTO resp = null;
 			try {
@@ -198,10 +213,11 @@ public class DataService {
 
 					infiniteLoop = false;
 
-				}catch(IllegalStateException e){
-					System.out.println("Arghh!! Bad Gateway for "+ questionUrl);
+				}catch(RestClientException e){
+					System.out.println(e);
 				}
 			}
+
 			System.out.println("==============" + questionUrl + "================ " + rowNum++);
 
 			List<LeaderboardModel> friendsLeaderboard = respEntity.getBody().getModels();
@@ -227,27 +243,42 @@ public class DataService {
 				e.printStackTrace();
 			}
 		}
-		// )
-		;
+
+		LocalDate trackingStartDate = LocalDate.parse("2019-08-16");
+
+		List<SimpleEntry<String,Integer>> ranklist = profileToCount.entrySet().stream().flatMap(a->{
+
+			int count = a.getValue().entrySet()
+										.stream()
+										.filter(countPerDate-> countPerDate.getKey().compareTo(trackingStartDate) >= 0)
+										.flatMapToInt(countPerDate->IntStream.of(countPerDate.getValue()))
+										.sum();
+
+			SimpleEntry<String,Integer> entryCount = new SimpleEntry<>(a.getKey(),count);
+			return Stream.of(entryCount);
+
+		})
+		.sorted((u,v) -> v.getValue().compareTo(u.getValue()))
+		.collect(Collectors.toList());
 
 		rowNum = 1;
 		int maxNumCharacters = 0;
-		for (Entry<String, Map<LocalDate, Integer>> currProfile : profileToCount.entrySet()) {
+		int offset = 1;
+
+		// for (Entry<String, Map<LocalDate, Integer>> currProfile : profileToCount.entrySet()) {
+		for (Entry<String, Integer> hacker : ranklist) {
+
+			String hackerProfile = hacker.getKey();
 
 			Row boardRow = leaderboardSheet.createRow(rowNum++);
-			maxNumCharacters = Math.max(maxNumCharacters,currProfile.getKey().length());
+			maxNumCharacters = Math.max(maxNumCharacters,hackerProfile.length());
 
-			boardRow.createCell(0)
-					.setCellValue(nameToProfile.getOrDefault(currProfile.getKey(), currProfile.getKey().toLowerCase()));
-
-			int total = 0;
-			Map<LocalDate, Integer> solvedPerDay = currProfile.getValue();
+			boardRow.createCell(0).setCellValue(nameToProfile.getOrDefault(hackerProfile, hackerProfile.toLowerCase()));
 
 			// keeping the start of first week same for both
 			// first week is till 25 Aug, 19[Sun]
-			LocalDate startDate = LocalDate.parse("2019-08-16");
+			LocalDate startDate = trackingStartDate;
 			LocalDate currWeekStart = startDate;
-			int currWeek = 1;
 
 			LocalDate firstWeekEnd = null;
 
@@ -257,6 +288,20 @@ public class DataService {
 			else
 				firstWeekEnd = LocalDate.parse("2019-08-26");
 
+
+			int totalWeeksUntillNow = (int)Math.ceil(Period.between(firstWeekEnd,LocalDate.now()).getDays()/7.0);
+			totalWeeksUntillNow++;
+
+			int total = hacker.getValue();
+			int currWeek = 1;
+
+			headerRow.getCell(offset).setCellValue("Total");
+			boardRow.createCell(offset).setCellValue(total);
+
+
+			Map<LocalDate, Integer> solvedPerDay = profileToCount.get(hackerProfile);
+
+			int weekIdx = offset + totalWeeksUntillNow - currWeek + 1;
 
 			while (currWeekStart.compareTo(firstWeekEnd) < 0) {
 				int weekTotal = 0;
@@ -269,10 +314,10 @@ public class DataService {
 
 				total += weekTotal;
 
-				headerRow.getCell(currWeek).setCellValue("Week " + currWeek);
-				boardRow.createCell(currWeek).setCellValue(weekTotal);
+				headerRow.getCell(weekIdx).setCellValue("Week " + currWeek);
+				boardRow.createCell(weekIdx).setCellValue(weekTotal);
 
-				Cell cell = boardRow.getCell(currWeek);
+				Cell cell = boardRow.getCell(weekIdx);
 				cellColour(weekTotal, cell, green, amber, red);
 
 				currWeekStart = currWeekEnd;
@@ -283,6 +328,8 @@ public class DataService {
 			currWeekStart = startDate;
 			currWeek = 2;
 			while (currWeekStart.compareTo(LocalDate.now()) < 0) {
+				weekIdx = offset + totalWeeksUntillNow - currWeek + 1;
+
 				int weekTotal = 0;
 				LocalDate currDate = currWeekStart;
 				LocalDate currWeekEnd = currWeekStart.plusDays(7);
@@ -293,19 +340,18 @@ public class DataService {
 
 				total += weekTotal;
 
-				headerRow.getCell(currWeek).setCellValue("Week " + currWeek);
-				boardRow.createCell(currWeek).setCellValue(weekTotal);
+				headerRow.getCell(weekIdx).setCellValue("Week " + currWeek);
+				boardRow.createCell(weekIdx).setCellValue(weekTotal);
 
-				Cell cell = boardRow.getCell(currWeek);
+				Cell cell = boardRow.getCell(weekIdx);
 				cellColour(weekTotal, cell, green, amber, red);
 
 				currWeek++;
 				currWeekStart = currWeekEnd;
 			}
-			headerRow.getCell(currWeek).setCellValue("Total");
-			boardRow.createCell(currWeek).setCellValue(total);
 
-			System.out.println("Calc done for: " + currProfile.getKey());
+
+			System.out.println("Calc done for: " + hackerProfile);
 		}
 
 		//so column doesn't get squeezed, this way is better than using autoSizeColumn()
