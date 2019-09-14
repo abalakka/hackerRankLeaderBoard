@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -38,6 +39,12 @@ import com.wissen.dto.QuestionsModel;
 
 @Service
 public class DataService {
+
+	@Value("${cookie.jigar}")
+	String jigarCookie;
+
+	@Value("${cookie.anirudh}")
+	String anirudhCookie;
 
 	public CellStyle cellStyle(Workbook wb, IndexedColors colour) {
 		CellStyle style = wb.createCellStyle();
@@ -57,14 +64,14 @@ public class DataService {
 				+ "/recent_challenges?limit=1000&cursor=&response_version=v1";
 	}
 
-	public HttpHeaders setCookie() {
+	public HttpHeaders setCookie(boolean trackingForGrads) {
 		HttpHeaders headers = new HttpHeaders();
 
-		// newgrads tracking => jigar's cookie
-		// employees tracking => anirudh's cookie
-		// based on "profileFilename" parameter in dataFor()
+		if(trackingForGrads)
+			headers.set("Cookie", "{"+jigarCookie+"}");
+		else
+			headers.set("Cookie", "{"+anirudhCookie+"}");
 
-		headers.set("Cookie", "{COOKIE}");
 		return headers;
 	}
 
@@ -87,6 +94,10 @@ public class DataService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		boolean trackingForGrads= false;
+		if(profileFilename.contains("grads"))
+			trackingForGrads= true;
 
 		Sheet profileSheet = profileWorkbook.getSheetAt(0);
 
@@ -168,13 +179,13 @@ public class DataService {
 		System.out.println("Starting the partaaay");
 		rowNum = 1;
 		// allQuestions.forEach(questionUrl -> {
+		HttpHeaders headers = setCookie(trackingForGrads);
+
 		for (String questionUrl : allQuestions) {
 			String leaderBoardUrl = leadboardUrlFor(questionUrl);
 
 			// if(rowNum++ > 20)
 			// break;
-
-			HttpHeaders headers = setCookie();
 
 			HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 			boolean infiniteLoop = true;
@@ -232,14 +243,25 @@ public class DataService {
 			int total = 0;
 			Map<LocalDate, Integer> solvedPerDay = currProfile.getValue();
 
+			// keeping the start of first week same for both
 			// first week is till 25 Aug, 19[Sun]
 			LocalDate startDate = LocalDate.parse("2019-08-16");
 			LocalDate currWeekStart = startDate;
 			int currWeek = 1;
-			while (currWeekStart.compareTo(LocalDate.parse("2019-08-26")) < 0) {
+
+			LocalDate firstWeekEnd = null;
+
+			if(trackingForGrads)
+			// first week end for grads was this (club started later for them)
+				firstWeekEnd = LocalDate.parse("2019-09-09");
+			else
+				firstWeekEnd = LocalDate.parse("2019-08-26");
+
+
+			while (currWeekStart.compareTo(firstWeekEnd) < 0) {
 				int weekTotal = 0;
 				LocalDate currDate = currWeekStart;
-				LocalDate currWeekEnd = LocalDate.parse("2019-08-26");
+				LocalDate currWeekEnd = firstWeekEnd;
 				while (currDate.compareTo(currWeekEnd) < 0) {
 					weekTotal += solvedPerDay.getOrDefault(currDate, 0);
 					currDate = currDate.plusDays(1);
@@ -256,10 +278,7 @@ public class DataService {
 				currWeekStart = currWeekEnd;
 			}
 
-			if(profileFilename.contains("grads"))
-				startDate = LocalDate.parse("2019-09-09");
-			else
-				startDate = LocalDate.parse("2019-08-26");
+			startDate = firstWeekEnd;
 
 			currWeekStart = startDate;
 			currWeek = 2;
@@ -290,7 +309,7 @@ public class DataService {
 		}
 
 		//so column doesn't get squeezed, this way is better than using autoSizeColumn()
-		int width = ((int)(maxNumCharacters * 1.14388)) * 256;
+		int width = ((int)((maxNumCharacters+5) * 1.14388)) * 256;
 		leaderboardSheet.setColumnWidth(0, width);
 
 		Font boldFont = leaderboardWorkbook.createFont();

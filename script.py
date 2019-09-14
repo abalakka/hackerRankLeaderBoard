@@ -44,7 +44,7 @@ if(result.stderr):
 	errors.append("Errors in employees profile tracking..\n\n\n");
 	errors.append(result.stderr.decode("utf-8"))
 
-# print("".join(errors))
+print("".join(errors))
 
 
 def prepare_attachment(filename):
