@@ -294,12 +294,8 @@ public class DataService {
 			int totalWeeksUntillNow = (int)Math.ceil(Period.between(firstWeekEnd,LocalDate.now()).getDays()/7.0);
 			totalWeeksUntillNow++;
 
-			int total = hacker.getValue();
+			int total = 0;
 			int currWeek = 1;
-
-			headerRow.getCell(offset).setCellValue("Total");
-			boardRow.createCell(offset).setCellValue(total);
-
 
 			Map<LocalDate, Integer> solvedPerDay = profileToCount.get(hackerProfile);
 
@@ -352,6 +348,8 @@ public class DataService {
 				currWeekStart = currWeekEnd;
 			}
 
+			headerRow.getCell(offset).setCellValue("Total");
+			boardRow.createCell(offset).setCellValue(total);
 
 			System.out.println("Calc done for: " + hackerProfile);
 		}
