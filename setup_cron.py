@@ -21,7 +21,7 @@ def setup_cron():
     job.env["BASE_DIR"] = script_path
 
     ## every morning 8 am uncomment when needed
-    job.hour.on(8)
+    job.hour.on(7)
     ## for testing comment when done
     # job.hour.on(10)
     # job.minute.on(16)
