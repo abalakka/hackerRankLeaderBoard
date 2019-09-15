@@ -69,7 +69,9 @@ fi
 
 install_dependency
 
+echo "setting system timezone to Asia/Kolkata .."
 sudo timedatectl set-timezone Asia/Kolkata
+echo "restarting cron service .."
 sudo service cron restart
 
 python3 setup_cron.py

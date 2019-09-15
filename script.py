@@ -14,11 +14,11 @@ from io import StringIO
 from secrets import fromaddr,toaddr,password
 
 
-# BASE_DIR = os.environ["BASE_DIR"]
+BASE_DIR = os.environ["BASE_DIR"]
 
 
 # for debugging
-BASE_DIR = "/home/jigar/projects/hackerRankLeaderBoard"
+# BASE_DIR = "/home/jigar/projects/hackerRankLeaderBoard"
 
 
 # for debugging
