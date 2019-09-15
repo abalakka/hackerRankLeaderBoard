@@ -1,5 +1,11 @@
 #!/bin/bash
 
+echo "======================================================================"
+
+echo "installing java 8 ..."
+
+sudo apt install openjdk-8-jdk-headless -y
+
 install_python3(){
 
 echo "installing python3 ..."
@@ -28,11 +34,12 @@ install_dependency(){
 echo "installing python dependency ..."
 
 # sudo -H pip3 install -r requirements.txt
-pip3 install -r requirements.txt
+sudo -H pip3 install -r requirements.txt
 
 echo "done installing python dependency ..."
 }
 
+echo "==================================================================================";
 
 if [ $(which python3) ]; then
 	if [ $(which pip3) ]; then
