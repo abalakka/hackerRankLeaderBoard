@@ -1,10 +1,14 @@
 #!/bin/bash
 
-echo "======================================================================"
+install_java8(){
 
 echo "installing java 8 ..."
 
 sudo apt install openjdk-8-jdk-headless -y
+
+echo "done installing java 8 ..."
+
+}
 
 install_python3(){
 
@@ -22,7 +26,7 @@ install_pip3(){
 
 echo "installing pip3 ..."
 
-sudo apt install python3-pip
+sudo apt install python3-pip -y
 
 echo "updating pip3 ..."
 sudo -H pip3 install --upgrade pip
@@ -39,7 +43,16 @@ sudo -H pip3 install -r requirements.txt
 echo "done installing python dependency ..."
 }
 
-echo "==================================================================================";
+
+
+if [ $(java -version 2>&1 | head -1 | cut -d'"' -f2 | sed '/^1\./s///' | cut -d'.' -f1) != "8" ];
+then
+	echo "======================================================================"
+	echo "Java 8 not found on system(I may be wrong :p)"
+	install_java8
+	echo "==================================================================================";
+fi
+
 
 if [ $(which python3) ]; then
 	if [ $(which pip3) ]; then
@@ -56,6 +69,8 @@ fi
 
 install_dependency
 
+sudo timedatectl set-timezone Asia/Kolkata
+sudo service cron restart
 
 python3 setup_cron.py
 

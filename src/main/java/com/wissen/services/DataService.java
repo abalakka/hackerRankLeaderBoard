@@ -369,7 +369,15 @@ public class DataService {
 		FileOutputStream opFile = null;
 		try {
 
-			opFile = new FileOutputStream("leaderboard_"+profileFilename);
+			String baseDir = System.getenv("BASE_DIR");
+			if(baseDir == null)
+				baseDir = "";
+			else
+				baseDir+="/";
+
+			String filePath = baseDir + "leaderboard_"+profileFilename;
+
+			opFile = new FileOutputStream(filePath);
 
 			leaderboardWorkbook.write(opFile);
 			opFile.close();
