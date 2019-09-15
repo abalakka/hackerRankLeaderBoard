@@ -271,9 +271,11 @@ public class DataService {
 			String hackerProfile = hacker.getKey();
 
 			Row boardRow = leaderboardSheet.createRow(rowNum++);
-			maxNumCharacters = Math.max(maxNumCharacters,hackerProfile.length());
+			String name = nameToProfile.getOrDefault(hackerProfile, hackerProfile.toLowerCase());
 
-			boardRow.createCell(0).setCellValue(nameToProfile.getOrDefault(hackerProfile, hackerProfile.toLowerCase()));
+			maxNumCharacters = Math.max(maxNumCharacters,name.length());
+
+			boardRow.createCell(0).setCellValue(name);
 
 			// keeping the start of first week same for both
 			// first week is till 25 Aug, 19[Sun]
@@ -355,7 +357,7 @@ public class DataService {
 		}
 
 		//so column doesn't get squeezed, this way is better than using autoSizeColumn()
-		int width = ((int)((maxNumCharacters+5) * 1.14388)) * 256;
+		int width = ((int)(maxNumCharacters * 1.14388)) * 256;
 		leaderboardSheet.setColumnWidth(0, width);
 
 		Font boldFont = leaderboardWorkbook.createFont();
