@@ -245,12 +245,16 @@ public class DataService {
 		}
 
 		LocalDate trackingStartDate = LocalDate.parse("2019-08-16");
+		LocalDate today = LocalDate.now();
 
 		List<SimpleEntry<String,Integer>> ranklist = profileToCount.entrySet().stream().flatMap(a->{
 
 			int count = a.getValue().entrySet()
 										.stream()
-										.filter(countPerDate-> countPerDate.getKey().compareTo(trackingStartDate) >= 0)
+										.filter(countPerDate-> {
+											return countPerDate.getKey().compareTo(trackingStartDate) >= 0
+													&& countPerDate.getKey().compareTo(today) < 0;
+										})
 										.flatMapToInt(countPerDate->IntStream.of(countPerDate.getValue()))
 										.sum();
 
@@ -325,7 +329,7 @@ public class DataService {
 
 			currWeekStart = startDate;
 			currWeek = 2;
-			while (currWeekStart.compareTo(LocalDate.now()) < 0) {
+			while (currWeekStart.compareTo(today) < 0) {
 				weekIdx = offset + totalWeeksUntillNow - currWeek + 1;
 
 				int weekTotal = 0;
