@@ -99,7 +99,7 @@ def send_email():
 
 		logfile = "error_logs.txt"
 
-		msg['Subject'] = f"ERROR : Attaching previous weeks leaderboard, check {logfile}"
+		msg['Subject'] = f"ERROR : Attaching previous leaderboard, check {logfile}"
 
 		with StringIO("".join(errors)) as f:
 			# instance of MIMEBase and named as p
