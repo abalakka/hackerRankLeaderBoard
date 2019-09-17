@@ -1,0 +1,55 @@
+All set for Azure
+
+create VM, preferably Ubuntu 18.04, steps almost similar of AWS
+
+Tip: Set static IP (changeable after setting VM as well under Settings>Configuration)
+
+
+Note: open SSH port 22 in inbound rules
+Settings > Networking > Inbound port rules [Add inbound port rule]
+
+
+Auto Start/Stop VM
+
+Search Resources > Automation account
+
+follow guide :-
+
+https://www.c-sharpcorner.com/article/how-to-start-vm-automatically-in-azure/
+
+Add schedule [Resources > Schedules] or [Link to schedule]
+
+Tip: Don't click on Start(It runs the job without bothering about schedule)
+
+
+
+More Tip:
+
+for cloud linux instance crontab to work, fix timezone
+$ sudo timedatectl set-timezone <timeszone>
+(equivalent cmd )
+$ ln -s /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
+
+
+check timezone
+$ cat /etc/localtime
+
+don't forget to restart cron service
+
+$ sudo service [cron|crond] restart
+
+###########################################
+
+run flow
+
+Initial setup
+1) git clone
+2) Add cookies.txt & secrets.py
+3) ./cookie_add.sh
+4) ./mvnw clean package
+5)./setup.sh
+
+Incr setup
+1) git pull
+2) ./cookie_add.sh
+3) ./mvnw clean package

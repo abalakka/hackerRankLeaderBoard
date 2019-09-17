@@ -64,7 +64,7 @@ public class HackerRankLeaderboardApplication implements CommandLineRunner {
 	}
 
 	private void _run(int idx) throws IOException {
-		System.out.println(dataService.dataFor(rs[idx-1].getInputStream(),idx));		
+		System.out.println(dataService.dataFor(rs[idx-1].getInputStream(),rs[idx-1].getFilename()));
 	}
 
 	private int getFileNumber(String arg) {
@@ -82,9 +82,13 @@ public class HackerRankLeaderboardApplication implements CommandLineRunner {
 		try {
 			if (rs == null)
 				rs = resourceResolver.getResources("classpath:*.xlsx");
-			
+
+			Arrays.sort(rs,(a,b)->{
+				return a.getFilename().compareTo(b.getFilename());
+			});
+
 			System.out.println(Arrays.asList(rs));
-			
+
 			if (print) {
 				if (rs.length == 0) {
 					sb.append("No profile excel file found in src/main/resources/*.xlsx");
