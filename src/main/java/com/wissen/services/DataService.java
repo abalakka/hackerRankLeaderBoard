@@ -33,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException.NotFound;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -164,7 +165,12 @@ public class DataService {
 				try{
 				 	response = restTemplate.getForEntity(url, String.class);
 					infiniteLoop = false;
-				}catch(RestClientException e){
+				}catch(NotFound e){
+					System.out.println("Username changed : "+profile);
+					infiniteLoop = false;
+				}
+				catch(RestClientException e){
+
 					System.out.println(e);
 				}
 			}
