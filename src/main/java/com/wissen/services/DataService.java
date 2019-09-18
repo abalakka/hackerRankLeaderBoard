@@ -137,11 +137,15 @@ public class DataService {
 				break;
 
 			try{
-				String name = row.getCell(0).getStringCellValue();
-				String profile = row.getCell(1).getStringCellValue();
-				System.out.println(name + " -> " + profile);
-				nameToProfile.put(profile.toLowerCase(), name);
-				profileToCount.put(profile.toLowerCase(), new HashMap<>());
+				boolean isEliminated = (int) row.getCell(2).getNumericCellValue() == 0 ? false : true;
+				if(!isEliminated) {
+					String name = row.getCell(0).getStringCellValue();
+					String profile = row.getCell(1).getStringCellValue();
+					System.out.println(name + " -> " + profile);
+					nameToProfile.put(profile.toLowerCase(), name);
+					profileToCount.put(profile.toLowerCase(), new HashMap<>());	
+				}
+				
 			}catch(NullPointerException e){
 				break;
 			}
