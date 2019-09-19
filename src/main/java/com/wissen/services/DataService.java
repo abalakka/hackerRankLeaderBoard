@@ -131,7 +131,7 @@ public class DataService {
 		Map<String, Map<LocalDate, Integer>> profileToCount = new HashMap<>();
 
 		int rowNum = 1;
-		int maxProfiles = profileSheet.getLastRowNum();
+		int maxProfiles = profileSheet.getPhysicalNumberOfRows();
 		for (Row row : profileSheet) {
 			if (rowNum++ > maxProfiles)
 				break;
@@ -143,9 +143,9 @@ public class DataService {
 					String profile = row.getCell(1).getStringCellValue();
 					System.out.println(name + " -> " + profile);
 					nameToProfile.put(profile.toLowerCase(), name);
-					profileToCount.put(profile.toLowerCase(), new HashMap<>());	
+					profileToCount.put(profile.toLowerCase(), new HashMap<>());
 				}
-				
+
 			}catch(NullPointerException e){
 				break;
 			}
@@ -345,7 +345,7 @@ public class DataService {
 				int weekTotal = 0;
 				LocalDate currDate = currWeekStart;
 				LocalDate currWeekEnd = currWeekStart.plusDays(7);
-				while (currDate.compareTo(currWeekEnd) < 0) {
+				while (currDate.compareTo(currWeekEnd) < 0 && currDate.compareTo(today) < 0) {
 					weekTotal += solvedPerDay.getOrDefault(currDate, 0);
 					currDate = currDate.plusDays(1);
 				}
