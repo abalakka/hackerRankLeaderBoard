@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -305,7 +305,7 @@ public class DataService {
 				firstWeekEnd = LocalDate.parse("2019-08-26");
 
 
-			int totalWeeksUntillNow = (int)Math.ceil(Period.between(firstWeekEnd,LocalDate.now()).getDays()/7.0);
+			int totalWeeksUntillNow = (int)Math.ceil(ChronoUnit.DAYS.between(firstWeekEnd,today)/7.0);
 			totalWeeksUntillNow++;
 
 			int total = 0;
