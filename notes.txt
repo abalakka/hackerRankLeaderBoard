@@ -8,6 +8,15 @@ Tip: Set static IP (changeable after setting VM as well under Settings>Configura
 Note: open SSH port 22 in inbound rules
 Settings > Networking > Inbound port rules [Add inbound port rule]
 
+jenkins setup
+https://www.digitalocean.com/community/tutorials/how-to-install-jenkins-on-ubuntu-18-04
+
+Tip:
+admin password
+$ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+Note: open jenkins port 8080 in inbound rules
+Settings > Networking > inbound port rules [Add inbound port rule]
 
 Auto Start/Stop VM
 

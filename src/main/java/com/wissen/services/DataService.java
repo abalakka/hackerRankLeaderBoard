@@ -27,6 +27,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -52,6 +54,8 @@ public class DataService {
 
 	@Value("${cookie.anirudh}")
 	String anirudhCookie;
+	
+	private static Logger LOG = LoggerFactory.getLogger(DataService.class);
 
 	public CellStyle cellStyle(Workbook wb, IndexedColors colour) {
 		CellStyle style = wb.createCellStyle();
@@ -99,7 +103,8 @@ public class DataService {
 		try {
 			profileWorkbook = new XSSFWorkbook(fIP);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage());
+			throw new RuntimeException();
 		}
 
 		boolean trackingForGrads = false;
@@ -145,7 +150,7 @@ public class DataService {
 				if (!isEliminated) {
 					String name = row.getCell(0).getStringCellValue();
 					String profile = row.getCell(1).getStringCellValue();
-					System.out.println(name + " -> " + profile);
+					LOG.info(name + " -> " + profile);
 					profileToName.put(profile.toLowerCase(), name);
 					profileToCount.put(profile.toLowerCase(), new HashMap<>());
 					if (trackingForGrads) {
@@ -159,7 +164,7 @@ public class DataService {
 			}
 		}
 
-		System.out.println("\n\n\n\n");
+		LOG.info("\n\n\n\n");
 
 		rowNum = 1;
 		// for (Row row : profileSheet) {
@@ -170,7 +175,7 @@ public class DataService {
 			// String profile = row.getCell(1).getStringCellValue();
 
 			String url = questionsUrlFor(profile);
-			System.out.println("url is: " + url);
+			LOG.info("url is: " + url);
 			ResponseEntity<String> response = null;
 			boolean infiniteLoop = true;
 			while (infiniteLoop) {
@@ -178,11 +183,11 @@ public class DataService {
 					response = restTemplate.getForEntity(url, String.class);
 					infiniteLoop = false;
 				} catch (NotFound e) {
-					System.out.println("Username changed : " + profile);
+					LOG.info("Username changed : " + profile);
 					infiniteLoop = false;
 				} catch (RestClientException e) {
 
-					System.out.println(e);
+					LOG.info(e.getMessage());
 				}
 			}
 
@@ -191,7 +196,8 @@ public class DataService {
 				resp = mapper.readValue(response.getBody(), new TypeReference<QuestionsDTO>() {
 				});
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOG.error(e.getMessage());
+				throw new RuntimeException();
 			}
 
 			List<QuestionsModel> submissions = resp.getModels();
@@ -203,12 +209,12 @@ public class DataService {
 			try {
 				Thread.sleep((long) (Math.random() * 250));
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				LOG.warn("Thread interupted..."+e.getMessage());
 			}
 		}
 
-		System.out.println("\n\n\n\n");
-		System.out.println("Starting the partaaay");
+		LOG.info("\n\n\n\n");
+		LOG.info("Starting the partaaay");
 		rowNum = 1;
 		// allQuestions.forEach(questionUrl -> {
 		HttpHeaders headers = setCookie(trackingForGrads);
@@ -231,16 +237,16 @@ public class DataService {
 					infiniteLoop = false;
 
 				} catch (RestClientException e) {
-					System.out.println(e);
+					LOG.info(e.getMessage());
 				}
 			}
 
-			System.out.println("==============" + questionUrl + "================ " + rowNum++);
+			LOG.info("==============" + questionUrl + "================ " + rowNum++);
 
 			List<LeaderboardModel> friendsLeaderboard = respEntity.getBody().getModels();
 			friendsLeaderboard.forEach(curr -> {
 				String currProfile = curr.getHacker().toLowerCase();
-				// System.out.println(currProfile + " Current profile");
+				// LOG.info(currProfile + " Current profile");
 				Map<LocalDate, Integer> dateToCount = profileToCount.getOrDefault(currProfile, new HashMap<>());
 
 				if (curr.getRank().equals("1")) {
@@ -248,16 +254,16 @@ public class DataService {
 					LocalDate date = Instant.ofEpochSecond(curr.getTime_taken())
 							.atZone(TimeZone.getDefault().toZoneId()).toLocalDate();
 					// if(date.compareTo(LocalDate.parse("2019-01-01")) < 0)
-					// System.out.println(date);
+					// LOG.info(date);
 					dateToCount.putIfAbsent(date, 0);
 					dateToCount.put(date, dateToCount.get(date) + 1);
-					// System.out.println(currProfile + " " + questionUrl + " TEMP: " + temp);
+					// LOG.info(currProfile + " " + questionUrl + " TEMP: " + temp);
 				}
 			});
 			try {
 				Thread.sleep((long) (Math.random() * 100));
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				LOG.warn("Thread interupted..."+e.getMessage());
 			}
 		}
 
@@ -381,7 +387,7 @@ public class DataService {
 			headerRow.getCell(offset).setCellValue("Total");
 			boardRow.createCell(offset).setCellValue(total);
 
-			System.out.println("Calc done for: " + hackerProfile);
+			LOG.info("Calc done for: " + hackerProfile);
 		}
 
 		// so column doesn't get squeezed, this way is better than using
@@ -417,7 +423,8 @@ public class DataService {
 			opFile.close();
 			leaderboardWorkbook.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOG.error(e.getMessage());
+			throw new RuntimeException();
 		}
 
 		return "done";

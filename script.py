@@ -22,27 +22,27 @@ BASE_DIR = os.environ["BASE_DIR"]
 
 
 # for debugging
-# result = subprocess.run(['java', '-cp',BASE_DIR,'hello'],stderr=subprocess.PIPE)
+# result = subprocess.run(['java', '-cp',BASE_DIR,'hello'],stdout=subprocess.PIPE)
 
 exjar = os.path.join(BASE_DIR,'target',"hackerRankLeaderboard-0.0.1-SNAPSHOT.jar")
 
-result = subprocess.run(['java','-jar' ,exjar,"1"],stderr=subprocess.PIPE)
+result = subprocess.run(['java','-jar' ,exjar,"1"],stdout=subprocess.PIPE)
 
 errors = []
 
-if(result.stderr):
+if(result.stdout):
 	errors.append("Errors in new grads profile tracking..\n\n\n");
-	errors.append(result.stderr.decode("utf-8"))
+	errors.append(result.stdout.decode("utf-8"))
 
-result = subprocess.run(['java','-jar' ,exjar,"2"],stderr=subprocess.PIPE)
+result = subprocess.run(['java','-jar' ,exjar,"2"],stdout=subprocess.PIPE)
 
-if(result.stderr):
+if(result.stdout):
 	if(errors):
 		errors.append("\n\n\n");
 		errors.append("#"*100)
 		errors.append("\n\n\n");
 	errors.append("Errors in employees profile tracking..\n\n\n");
-	errors.append(result.stderr.decode("utf-8"))
+	errors.append(result.stdout.decode("utf-8"))
 
 print("".join(errors))
 
