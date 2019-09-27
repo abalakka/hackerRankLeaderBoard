@@ -74,10 +74,10 @@ public class DataService {
 	public HttpHeaders setCookie(boolean trackingForGrads) {
 		HttpHeaders headers = new HttpHeaders();
 
-		if(trackingForGrads)
-			headers.set("Cookie", "{"+jigarCookie+"}");
+		if (trackingForGrads)
+			headers.set("Cookie", "{" + jigarCookie + "}");
 		else
-			headers.set("Cookie", "{"+anirudhCookie+"}");
+			headers.set("Cookie", "{" + anirudhCookie + "}");
 
 		return headers;
 	}
@@ -91,7 +91,7 @@ public class DataService {
 			cell.setCellStyle(red);
 	}
 
-	public String dataFor(InputStream fIP,String profileFilename) {
+	public String dataFor(InputStream fIP, String profileFilename) {
 		RestTemplate restTemplate = new RestTemplate();
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -102,9 +102,9 @@ public class DataService {
 			e.printStackTrace();
 		}
 
-		boolean trackingForGrads= false;
-		if(profileFilename.contains("grads"))
-			trackingForGrads= true;
+		boolean trackingForGrads = false;
+		if (profileFilename.contains("grads"))
+			trackingForGrads = true;
 
 		Sheet profileSheet = profileWorkbook.getSheetAt(0);
 
@@ -124,11 +124,14 @@ public class DataService {
 
 		Set<String> allQuestions = new HashSet<>();
 
-		// <Name, profile>
-		Map<String, String> nameToProfile = new HashMap<>();
+		// <profile,Name>
+		Map<String, String> profileToName = new HashMap<>();
 
 		// <profile, <Week, Solved>>
 		Map<String, Map<LocalDate, Integer>> profileToCount = new HashMap<>();
+
+		// <profile,college>
+		Map<String, String> profileToCollegeName = new HashMap<>();
 
 		int rowNum = 1;
 		int maxProfiles = profileSheet.getPhysicalNumberOfRows();
@@ -136,17 +139,22 @@ public class DataService {
 			if (rowNum++ > maxProfiles)
 				break;
 
-			try{
+			try {
 				boolean isEliminated = (int) row.getCell(2).getNumericCellValue() == 0 ? false : true;
-				if(!isEliminated) {
+
+				if (!isEliminated) {
 					String name = row.getCell(0).getStringCellValue();
 					String profile = row.getCell(1).getStringCellValue();
 					System.out.println(name + " -> " + profile);
-					nameToProfile.put(profile.toLowerCase(), name);
+					profileToName.put(profile.toLowerCase(), name);
 					profileToCount.put(profile.toLowerCase(), new HashMap<>());
+					if (trackingForGrads) {
+						String collegeName = row.getCell(3).getStringCellValue();
+						profileToCollegeName.put(profile.toLowerCase(), collegeName);
+					}
 				}
 
-			}catch(NullPointerException e){
+			} catch (NullPointerException e) {
 				break;
 			}
 		}
@@ -155,7 +163,7 @@ public class DataService {
 
 		rowNum = 1;
 		// for (Row row : profileSheet) {
-		for (String profile : nameToProfile.keySet()) {
+		for (String profile : profileToName.keySet()) {
 			if (rowNum++ > maxProfiles)
 				break;
 
@@ -163,17 +171,16 @@ public class DataService {
 
 			String url = questionsUrlFor(profile);
 			System.out.println("url is: " + url);
-			ResponseEntity<String> response=null;
+			ResponseEntity<String> response = null;
 			boolean infiniteLoop = true;
-			while(infiniteLoop){
-				try{
-				 	response = restTemplate.getForEntity(url, String.class);
+			while (infiniteLoop) {
+				try {
+					response = restTemplate.getForEntity(url, String.class);
 					infiniteLoop = false;
-				}catch(NotFound e){
-					System.out.println("Username changed : "+profile);
+				} catch (NotFound e) {
+					System.out.println("Username changed : " + profile);
 					infiniteLoop = false;
-				}
-				catch(RestClientException e){
+				} catch (RestClientException e) {
 
 					System.out.println(e);
 				}
@@ -214,16 +221,16 @@ public class DataService {
 
 			HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 			boolean infiniteLoop = true;
-			ResponseEntity<LeaderboardDTO> respEntity=null;
+			ResponseEntity<LeaderboardDTO> respEntity = null;
 
-			while(infiniteLoop){
+			while (infiniteLoop) {
 
-				try{
-					respEntity = restTemplate.exchange(leaderBoardUrl, HttpMethod.GET, entity,LeaderboardDTO.class);
+				try {
+					respEntity = restTemplate.exchange(leaderBoardUrl, HttpMethod.GET, entity, LeaderboardDTO.class);
 
 					infiniteLoop = false;
 
-				}catch(RestClientException e){
+				} catch (RestClientException e) {
 					System.out.println(e);
 				}
 			}
@@ -257,39 +264,49 @@ public class DataService {
 		LocalDate trackingStartDate = LocalDate.parse("2019-08-16");
 		LocalDate today = LocalDate.now();
 
-		List<SimpleEntry<String,Integer>> ranklist = profileToCount.entrySet().stream().flatMap(a->{
+		List<SimpleEntry<String, Integer>> ranklist = profileToCount.entrySet().stream().flatMap(a -> {
 
-			int count = a.getValue().entrySet()
-										.stream()
-										.filter(countPerDate-> {
-											return countPerDate.getKey().compareTo(trackingStartDate) >= 0
-													&& countPerDate.getKey().compareTo(today) < 0;
-										})
-										.flatMapToInt(countPerDate->IntStream.of(countPerDate.getValue()))
-										.sum();
+			int count = a.getValue().entrySet().stream().filter(countPerDate -> {
+				return countPerDate.getKey().compareTo(trackingStartDate) >= 0
+						&& countPerDate.getKey().compareTo(today) < 0;
+			}).flatMapToInt(countPerDate -> IntStream.of(countPerDate.getValue())).sum();
 
-			SimpleEntry<String,Integer> entryCount = new SimpleEntry<>(a.getKey(),count);
+			SimpleEntry<String, Integer> entryCount = new SimpleEntry<>(a.getKey(), count);
 			return Stream.of(entryCount);
 
-		})
-		.sorted((u,v) -> v.getValue().compareTo(u.getValue()))
-		.collect(Collectors.toList());
+		}).sorted((u, v) -> v.getValue().compareTo(u.getValue())).collect(Collectors.toList());
 
 		rowNum = 1;
-		int maxNumCharacters = 0;
+		int maxNumNameCharacters = 0;
+		int maxNumCollegeNameCharacters = 0;
+
 		int offset = 1;
 
-		// for (Entry<String, Map<LocalDate, Integer>> currProfile : profileToCount.entrySet()) {
+		if (trackingForGrads)
+			offset = 2;
+
+		// for (Entry<String, Map<LocalDate, Integer>> currProfile :
+		// profileToCount.entrySet()) {
 		for (Entry<String, Integer> hacker : ranklist) {
 
 			String hackerProfile = hacker.getKey();
 
 			Row boardRow = leaderboardSheet.createRow(rowNum++);
-			String name = nameToProfile.getOrDefault(hackerProfile, hackerProfile.toLowerCase());
+			String name = profileToName.getOrDefault(hackerProfile, hackerProfile.toLowerCase());
+			maxNumNameCharacters = Math.max(maxNumNameCharacters, name.length());
 
-			maxNumCharacters = Math.max(maxNumCharacters,name.length());
+			String collegeName = "";
+			if (trackingForGrads) {
+				collegeName = profileToCollegeName.getOrDefault(hackerProfile, "Hacking University");
+				maxNumCollegeNameCharacters = Math.max(maxNumCollegeNameCharacters, collegeName.length());
+			}
 
 			boardRow.createCell(0).setCellValue(name);
+
+			if (trackingForGrads) {
+				headerRow.getCell(1).setCellValue("College Name");
+				boardRow.createCell(1).setCellValue(collegeName);
+			}
 
 			// keeping the start of first week same for both
 			// first week is till 25 Aug, 19[Sun]
@@ -298,14 +315,13 @@ public class DataService {
 
 			LocalDate firstWeekEnd = null;
 
-			if(trackingForGrads)
-			// first week end for grads was this (club started later for them)
+			if (trackingForGrads)
+				// first week end for grads was this (club started later for them)
 				firstWeekEnd = LocalDate.parse("2019-09-09");
 			else
 				firstWeekEnd = LocalDate.parse("2019-08-26");
 
-
-			int totalWeeksUntillNow = (int)Math.ceil(ChronoUnit.DAYS.between(firstWeekEnd,today)/7.0);
+			int totalWeeksUntillNow = (int) Math.ceil(ChronoUnit.DAYS.between(firstWeekEnd, today) / 7.0);
 			totalWeeksUntillNow++;
 
 			int total = 0;
@@ -368,9 +384,15 @@ public class DataService {
 			System.out.println("Calc done for: " + hackerProfile);
 		}
 
-		//so column doesn't get squeezed, this way is better than using autoSizeColumn()
-		int width = ((int)(maxNumCharacters * 1.14388)) * 256;
+		// so column doesn't get squeezed, this way is better than using
+		// autoSizeColumn()
+		int width = ((int) (maxNumNameCharacters * 1.14388)) * 256;
 		leaderboardSheet.setColumnWidth(0, width);
+
+		if (trackingForGrads) {
+			width = ((int) (maxNumCollegeNameCharacters * 1.14388)) * 256;
+			leaderboardSheet.setColumnWidth(1, width);
+		}
 
 		Font boldFont = leaderboardWorkbook.createFont();
 		boldFont.setBold(true);
@@ -382,12 +404,12 @@ public class DataService {
 		try {
 
 			String baseDir = System.getenv("BASE_DIR");
-			if(baseDir == null)
+			if (baseDir == null)
 				baseDir = "";
 			else
-				baseDir+="/";
+				baseDir += "/";
 
-			String filePath = baseDir + "leaderboard_"+profileFilename;
+			String filePath = baseDir + "leaderboard_" + profileFilename;
 
 			opFile = new FileOutputStream(filePath);
 
