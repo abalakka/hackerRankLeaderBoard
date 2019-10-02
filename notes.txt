@@ -11,6 +11,10 @@ Settings > Networking > Inbound port rules [Add inbound port rule]
 jenkins setup
 https://www.digitalocean.com/community/tutorials/how-to-install-jenkins-on-ubuntu-18-04
 
+install this plugin
+
+https://plugins.jenkins.io/file-operations
+
 Tip:
 admin password
 $ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
