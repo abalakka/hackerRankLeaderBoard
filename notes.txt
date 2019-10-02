@@ -11,9 +11,17 @@ Settings > Networking > Inbound port rules [Add inbound port rule]
 jenkins setup
 https://www.digitalocean.com/community/tutorials/how-to-install-jenkins-on-ubuntu-18-04
 
-install this plugin
+1) create free style project
+2) add this in build steps
 
-https://plugins.jenkins.io/file-operations
+cp /home/jigar/secrets/** .
+
+./cookie_add.sh
+
+./mvnw clean package
+
+python3 setup_cron.py
+
 
 Tip:
 admin password
@@ -56,13 +64,14 @@ $ sudo service [cron|crond] restart
 run flow
 
 Initial setup
-1) git clone
-2) Add cookies.txt & secrets.py
-3) ./cookie_add.sh
-4) ./mvnw clean package
-5)./setup.sh
+X 1) git clone
+  2) Add cookies.txt & secrets.py in ~/secrets/ directory
+X 3) ./cookie_add.sh
+X 4) ./mvnw clean package
+X 5)./setup.sh
 
 Incr setup
-1) git pull
-2) ./cookie_add.sh
-3) ./mvnw clean package
+X 1) git pull
+X 2) ./cookie_add.sh
+X 3) ./mvnw clean package
+  4) git commit push
