@@ -11,6 +11,9 @@ Settings > Networking > Inbound port rules [Add inbound port rule]
 jenkins setup
 https://www.digitalocean.com/community/tutorials/how-to-install-jenkins-on-ubuntu-18-04
 
+github hooks
+https://dzone.com/articles/how-to-integrate-your-github-repository-to-your-je
+
 1) create free style project
 2) add this in build steps
 
