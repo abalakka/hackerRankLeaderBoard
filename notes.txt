@@ -74,4 +74,4 @@ Incr setup
 X 1) git pull
 X 2) ./cookie_add.sh
 X 3) ./mvnw clean package
-  4) git commit push
+  4) git commit push, jenkins build
