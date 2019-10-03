@@ -13,12 +13,29 @@ https://www.digitalocean.com/community/tutorials/how-to-install-jenkins-on-ubunt
 
 to change jenkins user password
 $ sudo passwd jenkins
+1) create free style project
 
-github hooks
+2) Source code management
+-> github repository
+
+
+3) build trigger
+-------------------------------------------
+github hooks (Not required, just FYI)
 https://dzone.com/articles/how-to-integrate-your-github-repository-to-your-je
 
-1) create free style project
-2) add this in build steps
+check "GitHub hook trigger for GITScm polling" in Build triggers
+-----------------------------------------
+(will be using this instead)
+
+jenkins startup triggers
+https://wiki.jenkins.io/display/JENKINS/Startup+Trigger
+
+check "Build when job nodes start" in Build triggers
+
+-------------------------------------------------
+
+4) add this in build steps
 
 ------------------------------
 cp /home/jigar/secrets/** .
@@ -77,7 +94,7 @@ run flow
 
 Initial setup
 X 1) git clone
-  2) Add cookies.txt & secrets.py in ~/secrets/ directory
+  2) Add cookies.txt & secrets.py in  -- ~/secrets/ -- directory
 X 3) ./cookie_add.sh
 X 4) ./mvnw clean package
 X 5)./setup.sh
@@ -86,4 +103,4 @@ Incr setup
 X 1) git pull
 X 2) ./cookie_add.sh
 X 3) ./mvnw clean package
-  4) git commit push, jenkins build
+  4) git commit push, (jenkins build when server starts)
