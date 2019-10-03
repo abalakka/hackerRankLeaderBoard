@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -130,7 +131,17 @@ def send_email():
 	text = msg.as_string()
 
 	# sending the mail
-	s.sendmail(fromaddr, toaddr, text)
+	done = False
+	while not done:
+
+		try:
+			s.sendmail(fromaddr, toaddr, text)
+			done = True
+		except smtplib.SMTPDataError as e:
+		# smtplib.SMTPDataError: (421, b'4.7.0 Temporary System Problem.  Try again later (10). d10sm816945pfh.8 - gsmtp')
+			print("gmail server down, trying to send email again")
+			time.sleep(10)
+
 
 	# terminating the session
 	s.quit()

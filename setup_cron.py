@@ -10,7 +10,7 @@ def setup_cron():
 
 
     for job in user_cron:
-        if script_path in job.command:
+        if "script.py" in job.command and "cron.log" in job.command:
             user_cron.remove(job)
             user_cron.write()
 
