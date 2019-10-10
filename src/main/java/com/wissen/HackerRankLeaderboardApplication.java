@@ -63,8 +63,13 @@ public class HackerRankLeaderboardApplication implements CommandLineRunner {
 		}
 	}
 
-	private void _run(int idx) throws IOException {
-		System.out.println(dataService.dataFor(rs[idx-1].getInputStream(),rs[idx-1].getFilename()));
+	private void _run(int idx){
+		try {
+		LOG.info(dataService.dataFor(rs[idx - 1].getInputStream(), rs[idx - 1].getFilename()));
+		}catch(IOException e) {
+			LOG.error(e.getMessage());
+			throw new RuntimeException();
+		}
 	}
 
 	private int getFileNumber(String arg) {
@@ -83,11 +88,11 @@ public class HackerRankLeaderboardApplication implements CommandLineRunner {
 			if (rs == null)
 				rs = resourceResolver.getResources("classpath:*.xlsx");
 
-			Arrays.sort(rs,(a,b)->{
+			Arrays.sort(rs, (a, b) -> {
 				return a.getFilename().compareTo(b.getFilename());
 			});
 
-			System.out.println(Arrays.asList(rs));
+			LOG.info(Arrays.asList(rs).toString());
 
 			if (print) {
 				if (rs.length == 0) {
@@ -100,7 +105,7 @@ public class HackerRankLeaderboardApplication implements CommandLineRunner {
 
 					sb.append("Run with args  1<= N <= ").append(rs.length);
 				}
-				System.out.println(sb);
+				LOG.info(sb.toString());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

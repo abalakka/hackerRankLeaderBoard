@@ -8,6 +8,51 @@ Tip: Set static IP (changeable after setting VM as well under Settings>Configura
 Note: open SSH port 22 in inbound rules
 Settings > Networking > Inbound port rules [Add inbound port rule]
 
+jenkins setup
+https://www.digitalocean.com/community/tutorials/how-to-install-jenkins-on-ubuntu-18-04
+
+to change jenkins user password
+$ sudo passwd jenkins
+1) create free style project
+
+2) Source code management
+-> github repository
+
+
+3) build trigger
+-------------------------------------------
+github hooks (Not required, just FYI)
+https://dzone.com/articles/how-to-integrate-your-github-repository-to-your-je
+
+check "GitHub hook trigger for GITScm polling" in Build triggers
+-----------------------------------------
+(will be using this instead)
+
+jenkins startup triggers
+https://wiki.jenkins.io/display/JENKINS/Startup+Trigger
+
+check "Build when job nodes start" in Build triggers
+
+-------------------------------------------------
+
+4) add this in build steps
+
+------------------------------
+cp /home/jigar/secrets/** .
+
+./cookie_add.sh
+
+./mvnw clean package
+
+python3 setup_cron.py
+-------------------------------
+
+Tip:
+admin password
+$ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+Note: open jenkins port 8080 in inbound rules
+Settings > Networking > inbound port rules [Add inbound port rule]
 
 Auto Start/Stop VM
 
@@ -38,18 +83,24 @@ don't forget to restart cron service
 
 $ sudo service [cron|crond] restart
 
+
+------------------------------
+check crontab for all users (Eg: jenkins )
+$ for user in $(cut -f1 -d: /etc/passwd); do echo $user; sudo crontab -u $user -l; done
+
 ###########################################
 
 run flow
 
 Initial setup
-1) git clone
-2) Add cookies.txt & secrets.py
-3) ./cookie_add.sh
-4) ./mvnw clean package
-5)./setup.sh
+X 1) git clone
+  2) Add cookies.txt & secrets.py in  -- ~/secrets/ -- directory
+X 3) ./cookie_add.sh
+X 4) ./mvnw clean package
+X 5)./setup.sh
 
 Incr setup
-1) git pull
-2) ./cookie_add.sh
-3) ./mvnw clean package
+X 1) git pull
+X 2) ./cookie_add.sh
+X 3) ./mvnw clean package
+  4) git commit push, (jenkins build when server starts)

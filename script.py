@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -22,27 +23,27 @@ BASE_DIR = os.environ["BASE_DIR"]
 
 
 # for debugging
-# result = subprocess.run(['java', '-cp',BASE_DIR,'hello'],stderr=subprocess.PIPE)
+# result = subprocess.run(['java', '-cp',BASE_DIR,'hello'],stdout=subprocess.PIPE)
 
 exjar = os.path.join(BASE_DIR,'target',"hackerRankLeaderboard-0.0.1-SNAPSHOT.jar")
 
-result = subprocess.run(['java','-jar' ,exjar,"1"],stderr=subprocess.PIPE)
+result = subprocess.run(['java','-jar' ,exjar,"1"],stdout=subprocess.PIPE)
 
 errors = []
 
-if(result.stderr):
+if(result.stdout):
 	errors.append("Errors in new grads profile tracking..\n\n\n");
-	errors.append(result.stderr.decode("utf-8"))
+	errors.append(result.stdout.decode("utf-8"))
 
-result = subprocess.run(['java','-jar' ,exjar,"2"],stderr=subprocess.PIPE)
+result = subprocess.run(['java','-jar' ,exjar,"2"],stdout=subprocess.PIPE)
 
-if(result.stderr):
+if(result.stdout):
 	if(errors):
 		errors.append("\n\n\n");
 		errors.append("#"*100)
 		errors.append("\n\n\n");
 	errors.append("Errors in employees profile tracking..\n\n\n");
-	errors.append(result.stderr.decode("utf-8"))
+	errors.append(result.stdout.decode("utf-8"))
 
 print("".join(errors))
 
@@ -130,7 +131,17 @@ def send_email():
 	text = msg.as_string()
 
 	# sending the mail
-	s.sendmail(fromaddr, toaddr, text)
+	done = False
+	while not done:
+
+		try:
+			s.sendmail(fromaddr, toaddr, text)
+			done = True
+		except smtplib.SMTPDataError as e:
+		# smtplib.SMTPDataError: (421, b'4.7.0 Temporary System Problem.  Try again later (10). d10sm816945pfh.8 - gsmtp')
+			print("gmail server down, trying to send email again")
+			time.sleep(10)
+
 
 	# terminating the session
 	s.quit()
@@ -138,3 +149,4 @@ def send_email():
 
 
 send_email()
+print("sending email complete")
