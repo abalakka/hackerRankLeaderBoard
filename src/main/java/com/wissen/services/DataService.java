@@ -348,7 +348,7 @@ public class DataService {
 
 				total += weekTotal;
 
-				headerRow.getCell(weekIdx).setCellValue("Week " + currWeek);
+				headerRow.getCell(weekIdx).setCellValue(currWeek);
 				boardRow.createCell(weekIdx).setCellValue(weekTotal);
 
 				Cell cell = boardRow.getCell(weekIdx);
@@ -374,7 +374,7 @@ public class DataService {
 
 				total += weekTotal;
 
-				headerRow.getCell(weekIdx).setCellValue("Week " + currWeek);
+				headerRow.getCell(weekIdx).setCellValue(currWeek);
 				boardRow.createCell(weekIdx).setCellValue(weekTotal);
 
 				Cell cell = boardRow.getCell(weekIdx);
