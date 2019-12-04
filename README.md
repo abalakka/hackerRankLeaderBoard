@@ -12,4 +12,4 @@ $ [bash] mvnw[.cmd] clean package
 $ java -jar target/hackerRankLeaderboard-0.0.1-SNAPSHOT.jar
 ```
 
-For more details, contact [me](mailto:jigarwala007@gmail.com)
+For more details, contact [Anirudh](mailto:anirudh.balakka@wissen.com) or [Jigar](mailto:jigar.wala@wissen.com)
