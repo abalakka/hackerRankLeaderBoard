@@ -1,14 +1,13 @@
 package com.wissen.dto;
 
-import lombok.EqualsAndHashCode;
-
-@EqualsAndHashCode
-public class LeaderboardModel implements Comparable<LeaderboardModel>
+public class UserModel
 {
 	private String rank;
+	private String profile;
 	private String hacker;
-	@EqualsAndHashCode.Exclude
+	private String college = "";
 	private Long time_taken;
+	private boolean solvedReqdQuestions;
 
 	public String getRank()
 	{
@@ -46,10 +45,29 @@ public class LeaderboardModel implements Comparable<LeaderboardModel>
 		return "LeaderboardModel [rank=" + rank + ", hacker=" + hacker + ", timestamp=" + time_taken + "]";
 	}
 
-	@Override
-	public int compareTo(LeaderboardModel o)
+	public String getCollege()
 	{
-		return this.hacker.compareTo(o.hacker);
+		return college;
 	}
 
+	public void setCollege(String college)
+	{
+		this.college = college;
+	}
+
+	public String getProfile()
+	{
+		return profile;
+	}
+
+	public void setProfile(String profile)
+	{
+		this.profile = profile;
+	}
+
+	public boolean isSolvedReqdQuestions() { return solvedReqdQuestions; }
+
+	public void setSolvedReqdQuestions(boolean solvedReqdQuestions) {
+		this.solvedReqdQuestions = solvedReqdQuestions;
+	}
 }

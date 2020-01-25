@@ -1,8 +1,5 @@
 package com.wissen;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,106 +7,56 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.wissen.services.DataService;
+import com.wissen.services.ProfileResourcePickerService;
+import com.wissen.util.HackerRankException;
 
 @SpringBootApplication
-public class HackerRankLeaderboardApplication implements CommandLineRunner {
+public class HackerRankLeaderboardApplication implements CommandLineRunner
+{
 
 	@Autowired
 	DataService dataService;
 
 	@Autowired
-	ResourcePatternResolver resourceResolver;
+	ProfileResourcePickerService pickerService;
 
-	static Resource[] rs;
 	private static Logger LOG = LoggerFactory.getLogger(HackerRankLeaderboardApplication.class);
 
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
 
 		SpringApplication.run(HackerRankLeaderboardApplication.class, args);
 
 	}
 
 	@Override
-	public void run(String... args) throws Exception {
-		if (args.length == 1 && args[0].equals("--spring.output.ansi.enabled=always")) {
-			help(true);
-		} else if (args.length == 1) {
-			int idx = getFileNumber(args[0]);
+	public void run(String... args) throws Exception
+	{
 
-			help(false);
+		try
+		{
+			long startTime = System.currentTimeMillis();
 
-			if (idx < 0 || idx > rs.length) {
-				help(true);
-			} else {
-				_run(idx);
-			}
+			LOG.info("Strating Service");
 
-		} else if (args.length == 2 && args[0].equals("--spring.output.ansi.enabled=always")) {
+			LOG.info("Trying to Pick Resource");
+			Resource resource = pickerService.getResource(args);
+			Resource weeklyQuestions = pickerService.getWeeklyQuestions();
+			LOG.info("Picked Resource Successfully");
 
-			int idx = getFileNumber(args[1]);
-			help(false);
-			if (idx < 0 || idx > rs.length) {
-				help(true);
-			} else {
+			LOG.info("Invoking Data Service to write LeadBoard");
+			dataService.service(resource, weeklyQuestions);
+			LOG.info("LeadBoard Written Successfully");
 
-				_run(idx);
-			}
-
-		} else {
-			help(true);
+			long endTime = System.currentTimeMillis();
+			System.out.println(endTime - startTime);
+			System.exit(1);
+		} catch (HackerRankException e)
+		{
+			LOG.error(e.getMessage(), e);
+			System.exit(1);
 		}
 	}
-
-	private void _run(int idx){
-		try {
-		LOG.info(dataService.dataFor(rs[idx - 1].getInputStream(), rs[idx - 1].getFilename()));
-		}catch(IOException e) {
-			LOG.error(e.getMessage());
-			throw new RuntimeException();
-		}
-	}
-
-	private int getFileNumber(String arg) {
-		try {
-			return Integer.parseInt(arg);
-		} catch (NumberFormatException e) {
-			return -1;
-		}
-	}
-
-	private void help(boolean print) {
-
-		StringBuilder sb = new StringBuilder();
-
-		try {
-			if (rs == null)
-				rs = resourceResolver.getResources("classpath:*.xlsx");
-
-			Arrays.sort(rs, (a, b) -> {
-				return a.getFilename().compareTo(b.getFilename());
-			});
-
-			LOG.info(Arrays.asList(rs).toString());
-
-			if (print) {
-				if (rs.length == 0) {
-					sb.append("No profile excel file found in src/main/resources/*.xlsx");
-
-				} else {
-					for (int i = 0; i < rs.length; i++) {
-						sb.append(i + 1).append(". ").append(rs[i].getFilename()).append("\n");
-					}
-
-					sb.append("Run with args  1<= N <= ").append(rs.length);
-				}
-				LOG.info(sb.toString());
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 }
