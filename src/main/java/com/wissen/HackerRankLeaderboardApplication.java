@@ -51,7 +51,7 @@ public class HackerRankLeaderboardApplication implements CommandLineRunner
 			LOG.info("LeadBoard Written Successfully");
 
 			long endTime = System.currentTimeMillis();
-			System.out.println(endTime - startTime);
+
 			System.exit(1);
 		} catch (HackerRankException e)
 		{

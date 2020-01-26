@@ -204,9 +204,9 @@ public class ExcelWriterUtil
 			else
 				baseDir += "/";
 
-			String filePath = baseDir + "leaderboard" + FILE_SUFFIX;
+			String filePath = baseDir + "leaderBoard" + FILE_SUFFIX;
 			if(trackingForGrads)
-				filePath = baseDir + "leaderboard_grads" + FILE_SUFFIX;
+				filePath = baseDir + "leaderBoard_grads" + FILE_SUFFIX;
 
 			opFile = new FileOutputStream(filePath);
 

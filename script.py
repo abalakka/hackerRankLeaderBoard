@@ -89,7 +89,7 @@ def send_email():
 	msg.attach(MIMEText(body, 'plain'))
 
 
-	for filename in glob(os.path.join(BASE_DIR,"leaderboard_*.xlsx")):
+	for filename in glob(os.path.join(BASE_DIR,"leaderBoard_*.xlsx")):
 
 		p = prepare_attachment(os.path.basename(filename))
 
