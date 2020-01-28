@@ -146,7 +146,14 @@ def send_email():
 	# terminating the session
 	s.quit()
 
-
+def delete_xlsx():
+	for filename in glob(os.path.join(BASE_DIR,"leaderBoard_*.xlsx")):
+		try:
+			os.remove(filename)
+		except:
+			print("Error while deleting file : ", filePath)
 
 send_email()
 print("sending email complete")
+delete_xlsx()
+print("deleted generated excel files")
