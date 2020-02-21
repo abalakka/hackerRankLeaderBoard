@@ -64,7 +64,7 @@ public class DataService implements AbstractService<Resource>
 		LOG.info("started Writing");
 
 		ConcurrentHashMap<String, TreeSet<LeaderboardModel>> allQuesLeadBoard = new ConcurrentHashMap<String, TreeSet<LeaderboardModel>>();
-		ExecutorService executorService = Executors.newFixedThreadPool(2);
+		ExecutorService executorService = Executors.newFixedThreadPool(3);
 		List<Future<UserRankModel>> UserRankModelsFuture = new ArrayList<Future<UserRankModel>>();
 		TreeSet<UserRankModel> UserRankModels = new TreeSet<UserRankModel>(new Comparator<UserRankModel>() {
 

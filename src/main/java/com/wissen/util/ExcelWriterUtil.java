@@ -68,6 +68,8 @@ public class ExcelWriterUtil
 		{
 
 			String hackerProfile = hacker.getModel().getProfile();
+			String hackerName = hacker.getModel().getHacker();
+			LOG.info("Started writing excel for: {}" , hackerName);
 
 			Row boardRow = leaderboardSheet.createRow(rowNum++);
 			String name = hacker.getModel().getHacker();
@@ -165,21 +167,30 @@ public class ExcelWriterUtil
 			headerRow.getCell(offset).setCellValue("Total");
 			boardRow.createCell(offset).setCellValue(total);
 
-			headerRow.getCell(solvedCell).setCellValue("Solved");
-			boardRow.createCell(solvedCell).setCellValue(hacker.getModel().isSolvedReqdQuestions());
+			headerRow.getCell(solvedCell).setCellValue("Remaining");
+			boardRow.createCell(solvedCell).setCellValue(hacker.getModel().getUnSolvedReqdQuestions());
 
-			LOG.info("Calc done for: " + hackerProfile);
+			LOG.info("Finished writing excel for: {}", hackerName);
 		}
 
 		// so column doesn't get squeezed, this way is better than using
 		// autoSizeColumn()
 		int width = ((int) (maxNumNameCharacters * 1.14388)) * 256;
 		leaderboardSheet.setColumnWidth(0, width);
+		leaderboardSheet.setColumnWidth(1, width/2);
 
 		if (trackingForGrads)
 		{
 			width = ((int) (maxNumCollegeNameCharacters * 1.14388 * 0.85)) * 256;
 			leaderboardSheet.setColumnWidth(1, width);
+			width = ((int) (11 * 1.14388 * 0.85)) * 256;
+			leaderboardSheet.setColumnWidth(2, width);
+		}
+
+		int startIdx = trackingForGrads ? 3 : 2;
+		width = ((int) (5 * 1.14388)) * 256;
+		for(int i = startIdx; i <= totalWeek + startIdx; i++) {
+			leaderboardSheet.setColumnWidth(i, width);
 		}
 
 		Font boldFont = leaderboardWorkbook.createFont();

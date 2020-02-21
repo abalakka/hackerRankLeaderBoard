@@ -3,10 +3,8 @@ package com.wissen.services;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +25,6 @@ import com.wissen.dto.UserModel;
 import com.wissen.dto.UserRankModel;
 import com.wissen.util.HackerRankException;
 import com.wissen.util.LeadBoardUrlUtil;
-
-//import net.bytebuddy.asm.Advice.Local;
 
 public class HackerrankThread implements Callable<UserRankModel>
 {
@@ -60,10 +56,10 @@ public class HackerrankThread implements Callable<UserRankModel>
 	@Override
 	public UserRankModel call() throws Exception
 	{
-
+		LOG.info("Starting calculation for user: {}", user.getHacker());
 		UserRankModel model = new UserRankModel();
 		model.setModel(user);
-		model.setDateToCount(new HashMap<LocalDate, Integer>());
+		model.setDateToCount(new HashMap<>());
 		List<QuestionsModel> submissions = getAllQuestionforUser();
 		hasSolvedReqdQuestions(model, submissions);
 		for (QuestionsModel questionsModel : submissions)
@@ -78,6 +74,7 @@ public class HackerrankThread implements Callable<UserRankModel>
 				updateUserRankModel(model, question);
 			}
 		}
+		LOG.info("Completed calculation for user: {}", user.getHacker());
 		return model;
 	}
 
@@ -86,7 +83,9 @@ public class HackerrankThread implements Callable<UserRankModel>
 		for(QuestionsModel submission : submissions) {
 			solvedQuestions.add(submission.getCh_slug());
 		}
-		model.getModel().setSolvedReqdQuestions(solvedQuestions.containsAll(this.reqdQuiestions));
+		Set<String> copyOfReqdQues = new HashSet<>(this.reqdQuiestions);
+		copyOfReqdQues.removeAll(solvedQuestions);
+		model.getModel().setUnSolvedReqdQuestions(copyOfReqdQues.size());
 	}
 
 	private void updateUserRankModel(UserRankModel model, String question)

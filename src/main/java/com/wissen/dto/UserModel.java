@@ -7,7 +7,7 @@ public class UserModel
 	private String hacker;
 	private String college = "";
 	private Long time_taken;
-	private boolean solvedReqdQuestions;
+	private int unSolvedReqdQuestions;
 
 	public String getRank()
 	{
@@ -65,9 +65,9 @@ public class UserModel
 		this.profile = profile;
 	}
 
-	public boolean isSolvedReqdQuestions() { return solvedReqdQuestions; }
+	public int getUnSolvedReqdQuestions() { return unSolvedReqdQuestions; }
 
-	public void setSolvedReqdQuestions(boolean solvedReqdQuestions) {
-		this.solvedReqdQuestions = solvedReqdQuestions;
+	public void setUnSolvedReqdQuestions(int unSolvedReqdQuestions) {
+		this.unSolvedReqdQuestions = unSolvedReqdQuestions;
 	}
 }
