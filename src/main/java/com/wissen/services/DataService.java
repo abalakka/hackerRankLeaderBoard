@@ -65,20 +65,18 @@ public class DataService implements AbstractService<Resource>
 
 		ConcurrentHashMap<String, TreeSet<LeaderboardModel>> allQuesLeadBoard = new ConcurrentHashMap<String, TreeSet<LeaderboardModel>>();
 		ExecutorService executorService = Executors.newFixedThreadPool(3);
-		List<Future<UserRankModel>> UserRankModelsFuture = new ArrayList<Future<UserRankModel>>();
-		TreeSet<UserRankModel> UserRankModels = new TreeSet<UserRankModel>(new Comparator<UserRankModel>() {
+		List<Future<UserRankModel>> UserRankModelsFuture = new ArrayList<>();
+		TreeSet<UserRankModel> UserRankModels = new TreeSet<>((o1, o2) -> {
+			int remainingComparison = o1.getModel().getUnSolvedReqdQuestions() - o2.getModel().getUnSolvedReqdQuestions();
+			if (remainingComparison != 0)
+				return remainingComparison;
 
-			@Override
-			public int compare(UserRankModel o1, UserRankModel o2)
-			{
-				Integer c1 = o1.getDateToCount().values().stream().mapToInt(i -> i.intValue()).sum();
-				Integer c2 = o2.getDateToCount().values().stream().mapToInt(i -> i.intValue()).sum();
-				if (c2.compareTo(c1) == 0)
-				{
-					return o1.getModel().getHacker().compareTo(o2.getModel().getHacker());
-				}
-				return c2.compareTo(c1);
+			Integer c1 = o1.getDateToCount().values().stream().mapToInt(i -> i.intValue()).sum();
+			Integer c2 = o2.getDateToCount().values().stream().mapToInt(i -> i.intValue()).sum();
+			if (c2.compareTo(c1) == 0) {
+				return o1.getModel().getHacker().compareTo(o2.getModel().getHacker());
 			}
+			return c2.compareTo(c1);
 		});
 		for (UserModel user : users)
 		{
