@@ -8,10 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -134,7 +131,9 @@ public class HackerrankThread implements Callable<UserRankModel>
 
 		try
 		{
-			ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+			HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+			ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
 			ObjectMapper mapper = new ObjectMapper();
 			QuestionsDTO resp = null;
@@ -144,7 +143,7 @@ public class HackerrankThread implements Callable<UserRankModel>
 			return resp.getModels();
 		} catch (Exception e)
 		{
-			LOG.info(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 			throw new HackerRankException(e);
 		}
 	}
