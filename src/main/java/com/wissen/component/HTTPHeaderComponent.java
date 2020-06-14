@@ -2,6 +2,7 @@ package com.wissen.component;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,6 +23,7 @@ public class HTTPHeaderComponent
 		else
 			headers.set("Cookie", "{" + anirudhCookie + "}");
 
+		headers.add("user-agent", "PostmanRuntime/7.23.0");
 		return headers;
 	}
 
