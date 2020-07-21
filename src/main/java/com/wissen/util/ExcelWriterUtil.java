@@ -48,7 +48,7 @@ public class ExcelWriterUtil
 		Cell headerCells = headerRow.createCell(0);
 		headerCells.setCellValue("Name");
 
-		for (int i = 1; i <= 50; i++)
+		for (int i = 1; i <= 55; i++) //TODO: dynamically set this to value of total weeks.
 			headerRow.createCell(i);
 
 		CellStyle red = excelStyleUtil.cellStyle(leaderboardWorkbook, IndexedColors.RED);
